@@ -1199,7 +1199,108 @@ body.light-mode .floating-badge {
   .badge-web {
     right: -1%;
   }
+/* =====================================================
+   MOBILE PERFORMANCE OPTIMIZATION
+===================================================== */
 
+@media (max-width: 768px) {
+
+  /* Reduce expensive glass rendering */
+
+  .navbar,
+  .skill-card,
+  .project-card,
+  .experience-card,
+  .portrait-glass,
+  .floating-badge,
+  .portrait-info,
+  .secondary-btn {
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+
+  /* Remove expensive blur during scroll reveal */
+
+  .reveal {
+    filter: none;
+
+    transform: translateY(25px);
+
+    transition:
+      opacity 0.45s ease,
+      transform 0.45s ease;
+  }
+
+
+  /* Lighter shadows */
+
+  .skill-card,
+  .project-card,
+  .experience-card,
+  .portrait-glass {
+
+    box-shadow:
+      0 12px 30px rgba(0, 0, 0, 0.18);
+  }
+
+
+  /* Disable mouse-following glow on touch devices */
+
+  .navbar::before,
+  .skill-card::before,
+  .project-card::before,
+  .experience-card::before,
+  .portrait-glass::before {
+
+    display: none;
+  }
+
+
+  /* Reduce ambient background rendering */
+
+  .hero-orb {
+    filter: blur(8px);
+    opacity: 0.45;
+  }
+
+
+  /* Slow / simplify continuous animations */
+
+  .orb-one,
+  .orb-two {
+    animation: none;
+  }
+
+
+  .floating-badge {
+    animation-duration: 8s;
+  }
+
+
+  /* Remove expensive card hover transformations */
+
+  .skill-card:hover,
+  .project-card:hover,
+  .experience-card:hover {
+
+    transform: none;
+  }
+
+
+  /* Faster theme transitions */
+
+  body,
+  .navbar,
+  .skill-card,
+  .project-card,
+  .experience-card,
+  .portrait-glass {
+
+    transition-duration: 0.25s;
+  }
+}
   .badge-code {
     bottom: 12%;
   }
