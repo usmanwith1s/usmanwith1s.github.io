@@ -749,3 +749,60 @@ body.light-mode .experience-card:hover {
     transition-duration: 0.01ms !important;
   }
 }
+/* =====================================================
+   MOUSE REACTIVE GLASS
+===================================================== */
+
+.navbar,
+.skill-card,
+.project-card,
+.experience-card,
+.portrait-glass {
+  position: relative;
+}
+
+.navbar::before,
+.skill-card::before,
+.project-card::before,
+.experience-card::before,
+.portrait-glass::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  border-radius: inherit;
+
+  background:
+    radial-gradient(
+      220px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(255, 255, 255, 0.16),
+      transparent 55%
+    );
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transition: opacity 0.25s ease;
+}
+
+.navbar:hover::before,
+.skill-card:hover::before,
+.project-card:hover::before,
+.experience-card:hover::before,
+.portrait-glass:hover::before {
+  opacity: 1;
+}
+
+
+/* keep actual content above the glass highlight */
+
+.navbar > *,
+.skill-card > *,
+.project-card > *,
+.experience-card > *,
+.portrait-glass > * {
+  position: relative;
+  z-index: 2;
+}
