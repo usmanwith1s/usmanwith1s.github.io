@@ -1394,6 +1394,43 @@ body.light-mode .floating-badge {
   }
 }
 /* =====================================================
+   PORTRAIT INNER GLASS FRAME
+===================================================== */
+
+.portrait-frame {
+  width: 78%;
+  height: 82%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 34px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.10),
+      rgba(255, 255, 255, 0.025)
+    );
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 18px 45px rgba(0, 0, 0, 0.20);
+
+  overflow: hidden;
+
+  position: relative;
+  z-index: 2;
+}
+
+
+/* =====================================================
    PORTRAIT IMAGE
 ===================================================== */
 
@@ -1401,55 +1438,15 @@ body.light-mode .floating-badge {
   width: 100%;
   height: 100%;
 
-  object-fit: cover;
-  object-position: center top;
+  object-fit: contain;
+  object-position: center;
 
-  border-radius: inherit;
-
-  transform: scale(1.03);
-
-  transition:
-    transform 0.35s ease,
-    filter 0.35s ease;
+  display: block;
 }
 
-.portrait-glass:hover .portrait-image {
-  transform: scale(1.06);
-}
 
-/* subtle blend into the glass */
-.portrait-glass::after {
-  content: "";
+/* keep status floating above everything */
 
-  position: absolute;
-  inset: 0;
-
-  pointer-events: none;
-
-  background:
-    linear-gradient(
-      to bottom,
-      transparent 55%,
-      rgba(5, 11, 20, 0.18) 75%,
-      rgba(5, 11, 20, 0.48) 100%
-    );
-
-  z-index: 1;
-}
-
-/* keep status above image */
 .portrait-info {
-  z-index: 3;
-}
-
-/* slightly softer on mobile */
-@media (max-width: 768px) {
-
-  .portrait-image {
-    transform: none;
-  }
-
-  .portrait-glass:hover .portrait-image {
-    transform: none;
-  }
+  z-index: 5;
 }
