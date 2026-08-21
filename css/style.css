@@ -132,6 +132,15 @@ body {
   transform: rotate(12deg) scale(1.05);
   background: rgba(255, 255, 255, 0.13);
 }
+.theme-toggle {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+}
 
 /* ---------------- HERO ---------------- */
 
@@ -1461,6 +1470,9 @@ body.light-mode .floating-badge {
 .theme-icon {
   position: absolute;
 
+  top: 50%;
+  left: 50%;
+
   width: 19px;
   height: 19px;
 
@@ -1477,22 +1489,22 @@ body.light-mode .floating-badge {
 
 .moon-icon {
   opacity: 1;
-  transform: rotate(0deg) scale(1);
+  transform: translate(-50%, -50%) rotate(0deg) scale(1);
 }
 
 .sun-icon {
   opacity: 0;
-  transform: rotate(-60deg) scale(0.55);
+  transform: translate(-50%, -50%) rotate(-60deg) scale(0.55);
 }
 
 body.light-mode .moon-icon {
   opacity: 0;
-  transform: rotate(60deg) scale(0.55);
+  transform: translate(-50%, -50%) rotate(60deg) scale(0.55);
 }
 
 body.light-mode .sun-icon {
   opacity: 1;
-  transform: rotate(0deg) scale(1);
+  transform: translate(-50%, -50%) rotate(0deg) scale(1);
 }
 .nav-links a.active {
   color: var(--text);
