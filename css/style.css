@@ -1989,3 +1989,12 @@ body.light-mode .tech-chip:hover {
     transform: none;
   }
 }
+.skill-group-wide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+  .skill-group-wide {
+    grid-column: auto;
+  }
+}
