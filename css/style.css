@@ -1796,3 +1796,196 @@ body.light-mode .glass-panel {
   }
 
 }
+/* =====================================================
+   SKILLS SECTION
+===================================================== */
+
+.skills-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.skill-group {
+  padding: 30px;
+  min-height: 210px;
+
+  overflow: hidden;
+
+  transition:
+    transform 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.skill-group:hover {
+  transform: translateY(-6px);
+
+  border-color: rgba(255, 255, 255, 0.24);
+
+  box-shadow:
+    0 28px 65px rgba(0, 0, 0, 0.24);
+}
+
+.skill-group-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  margin-bottom: 24px;
+}
+
+.skill-group-header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.skill-icon {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(124, 92, 255, 0.22),
+      rgba(45, 212, 191, 0.10)
+    );
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  color: var(--accent-2);
+
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+
+/* ---------------- TECH CHIPS ---------------- */
+
+.tech-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tech-chip {
+  position: relative;
+
+  padding: 9px 13px;
+
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.06);
+
+  border: 1px solid rgba(255, 255, 255, 0.10);
+
+  color: var(--text-muted);
+
+  font-size: 0.82rem;
+  font-weight: 600;
+
+  transition:
+    transform 0.25s ease,
+    color 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.tech-chip:hover {
+  transform: translateY(-2px);
+
+  color: var(--text);
+
+  background: rgba(255, 255, 255, 0.10);
+
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+
+/* ---------------- MOUSE GLOW ---------------- */
+
+.skill-group::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  border-radius: inherit;
+
+  background:
+    radial-gradient(
+      300px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(124, 92, 255, 0.13),
+      transparent 58%
+    );
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transition: opacity 0.25s ease;
+}
+
+.skill-group:hover::before {
+  opacity: 1;
+}
+
+
+/* keep content above glow */
+
+.skill-group > * {
+  position: relative;
+  z-index: 2;
+}
+
+
+/* ---------------- LIGHT MODE ---------------- */
+
+body.light-mode .tech-chip {
+  background: rgba(255, 255, 255, 0.48);
+
+  border-color: rgba(15, 23, 42, 0.08);
+
+  color: #667085;
+}
+
+body.light-mode .tech-chip:hover {
+  background: rgba(255, 255, 255, 0.75);
+
+  color: #111827;
+
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+
+/* ---------------- MOBILE ---------------- */
+
+@media (max-width: 768px) {
+
+  .skills-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .skill-group {
+    min-height: auto;
+
+    padding: 24px;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .skill-group::before {
+    display: none;
+  }
+
+  .skill-group:hover {
+    transform: none;
+  }
+}
