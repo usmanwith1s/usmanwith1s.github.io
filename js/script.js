@@ -75,9 +75,9 @@ document.addEventListener("DOMContentLoaded", () => {
 const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
 
 if (!isTouchDevice) {
-  const glassElements = document.querySelectorAll(
-    ".navbar, .skill-card, .project-card, .experience-card, .portrait-glass"
-  );
+ const glassElements = document.querySelectorAll(
+  ".navbar, .skill-card, .project-card, .experience-card, .portrait-glass, .about-main, .about-stat"
+);
 
   glassElements.forEach((element) => {
     element.addEventListener("mousemove", (e) => {
