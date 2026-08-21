@@ -1393,3 +1393,63 @@ body.light-mode .floating-badge {
     transform: none !important;
   }
 }
+/* =====================================================
+   PORTRAIT IMAGE
+===================================================== */
+
+.portrait-image {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  object-position: center top;
+
+  border-radius: inherit;
+
+  transform: scale(1.03);
+
+  transition:
+    transform 0.35s ease,
+    filter 0.35s ease;
+}
+
+.portrait-glass:hover .portrait-image {
+  transform: scale(1.06);
+}
+
+/* subtle blend into the glass */
+.portrait-glass::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      to bottom,
+      transparent 55%,
+      rgba(5, 11, 20, 0.18) 75%,
+      rgba(5, 11, 20, 0.48) 100%
+    );
+
+  z-index: 1;
+}
+
+/* keep status above image */
+.portrait-info {
+  z-index: 3;
+}
+
+/* slightly softer on mobile */
+@media (max-width: 768px) {
+
+  .portrait-image {
+    transform: none;
+  }
+
+  .portrait-glass:hover .portrait-image {
+    transform: none;
+  }
+}
