@@ -76,7 +76,7 @@ const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
 
 if (!isTouchDevice) {
  const glassElements = document.querySelectorAll(
-  ".navbar, .skill-card, .project-card, .experience-card, .portrait-glass, .about-main, .about-stat"
+  ".navbar, .skill-card, .project-card, .experience-card, .portrait-glass, .about-main, .about-stat, .skill-group"
 );
 
   glassElements.forEach((element) => {
