@@ -159,4 +159,59 @@ const navObserver = new IntersectionObserver(
 sections.forEach((section) => {
   navObserver.observe(section);
 });
+  /* =========================
+   CONTACT FORM AJAX
+========================= */
+
+const contactForm = document.querySelector("#contactForm");
+
+if (contactForm) {
+  const sendButton = contactForm.querySelector(".send-button");
+
+  const formStatus = document.createElement("p");
+  formStatus.className = "form-status";
+  contactForm.appendChild(formStatus);
+
+  contactForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const originalButtonContent = sendButton.innerHTML;
+
+    sendButton.disabled = true;
+    sendButton.innerHTML = "<span>Sending...</span>";
+
+    formStatus.textContent = "";
+    formStatus.classList.remove("success", "error");
+
+    try {
+      const formData = new FormData(contactForm);
+
+      const response = await fetch(contactForm.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+          Accept: "application/json"
+        }
+      });
+
+      if (response.ok) {
+        formStatus.textContent = "Message sent successfully.";
+        formStatus.classList.add("success");
+
+        contactForm.reset();
+      } else {
+        formStatus.textContent =
+          "Something went wrong. Please try again.";
+        formStatus.classList.add("error");
+      }
+    } catch (error) {
+      formStatus.textContent =
+        "Unable to send right now. Please try again.";
+      formStatus.classList.add("error");
+    }
+
+    sendButton.disabled = false;
+    sendButton.innerHTML = originalButtonContent;
+  });
+}
 });
