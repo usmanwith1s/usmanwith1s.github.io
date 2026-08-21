@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const isLight = document.body.classList.contains("light-mode");
 
-    themeToggle.textContent = isLight ? "☀" : "☾";
+   
 
     themeToggle.setAttribute(
       "aria-label",
