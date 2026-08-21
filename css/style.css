@@ -806,3 +806,401 @@ body.light-mode .experience-card:hover {
   position: relative;
   z-index: 2;
 }
+/* =====================================================
+   PREMIUM HERO VISUAL
+===================================================== */
+
+.hero-visual {
+  min-height: 580px;
+  perspective: 1200px;
+}
+
+
+/* ---------------- AMBIENT ORBS ---------------- */
+
+.hero-orb {
+  position: absolute;
+
+  border-radius: 50%;
+
+  filter: blur(3px);
+
+  pointer-events: none;
+
+  opacity: 0.8;
+}
+
+.orb-one {
+  width: 220px;
+  height: 220px;
+
+  top: 5%;
+  right: -5%;
+
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      rgba(255, 255, 255, 0.28),
+      rgba(124, 92, 255, 0.28) 25%,
+      rgba(124, 92, 255, 0.06) 65%,
+      transparent 75%
+    );
+
+  animation: orbOneMove 9s ease-in-out infinite;
+}
+
+.orb-two {
+  width: 170px;
+  height: 170px;
+
+  bottom: 5%;
+  left: -5%;
+
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      rgba(255, 255, 255, 0.20),
+      rgba(45, 212, 191, 0.24) 30%,
+      transparent 70%
+    );
+
+  animation: orbTwoMove 11s ease-in-out infinite;
+}
+
+
+/* ---------------- PORTRAIT GLASS ---------------- */
+
+.portrait-glass {
+  isolation: isolate;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transform-style: preserve-3d;
+
+  transition:
+    transform 0.18s ease-out,
+    box-shadow 0.3s ease;
+}
+
+.portrait-placeholder {
+  width: 78%;
+  height: 82%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 34px;
+
+  background:
+    radial-gradient(
+      circle at 50% 30%,
+      rgba(124, 92, 255, 0.18),
+      transparent 48%
+    ),
+    linear-gradient(
+      150deg,
+      rgba(255, 255, 255, 0.08),
+      rgba(255, 255, 255, 0.01)
+    );
+
+  border: 1px solid rgba(255, 255, 255, 0.10);
+
+  overflow: hidden;
+}
+
+.portrait-placeholder span {
+  font-size: clamp(5rem, 10vw, 8rem);
+  font-weight: 900;
+
+  letter-spacing: -0.08em;
+
+  color: rgba(255, 255, 255, 0.12);
+
+  user-select: none;
+}
+
+
+/* ---------------- STATUS CHIP ---------------- */
+
+.portrait-info {
+  position: absolute;
+
+  left: 50%;
+  bottom: 24px;
+
+  transform: translateX(-50%) translateZ(45px);
+
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  white-space: nowrap;
+
+  padding: 11px 16px;
+
+  border-radius: 999px;
+
+  background: rgba(8, 15, 27, 0.62);
+
+  border: 1px solid rgba(255, 255, 255, 0.14);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  color: rgba(255, 255, 255, 0.84);
+
+  font-size: 0.78rem;
+  font-weight: 600;
+
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.22);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+
+  background: #2dd4bf;
+
+  box-shadow:
+    0 0 0 4px rgba(45, 212, 191, 0.11),
+    0 0 15px rgba(45, 212, 191, 0.8);
+
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+
+/* =====================================================
+   FLOATING GLASS BADGES
+===================================================== */
+
+.floating-badge {
+  position: absolute;
+  z-index: 5;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 11px 15px;
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.13),
+      rgba(255, 255, 255, 0.045)
+    );
+
+  border: 1px solid rgba(255, 255, 255, 0.16);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 15px 40px rgba(0, 0, 0, 0.24);
+
+  color: var(--text);
+
+  font-size: 0.82rem;
+  font-weight: 650;
+
+  pointer-events: none;
+}
+
+.floating-badge span {
+  color: var(--accent-2);
+}
+
+.badge-java {
+  top: 15%;
+  left: -2%;
+
+  animation: badgeFloatOne 5s ease-in-out infinite;
+}
+
+.badge-web {
+  right: -7%;
+  top: 39%;
+
+  animation: badgeFloatTwo 6s ease-in-out infinite;
+}
+
+.badge-code {
+  left: 2%;
+  bottom: 15%;
+
+  animation: badgeFloatThree 7s ease-in-out infinite;
+}
+
+
+/* =====================================================
+   HERO ANIMATIONS
+===================================================== */
+
+@keyframes orbOneMove {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(-25px, 25px) scale(1.12);
+  }
+}
+
+@keyframes orbTwoMove {
+
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(25px, -18px);
+  }
+}
+
+@keyframes badgeFloatOne {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+
+  50% {
+    transform: translateY(-13px) rotate(1deg);
+  }
+}
+
+@keyframes badgeFloatTwo {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(3deg);
+  }
+
+  50% {
+    transform: translateY(14px) rotate(-1deg);
+  }
+}
+
+@keyframes badgeFloatThree {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+
+@keyframes statusPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+
+/* =====================================================
+   HERO LIGHT MODE
+===================================================== */
+
+body.light-mode .portrait-placeholder {
+  background:
+    radial-gradient(
+      circle at 50% 30%,
+      rgba(124, 92, 255, 0.12),
+      transparent 48%
+    ),
+    rgba(255, 255, 255, 0.24);
+
+  border-color: rgba(15, 23, 42, 0.07);
+}
+
+body.light-mode .portrait-placeholder span {
+  color: rgba(15, 23, 42, 0.10);
+}
+
+body.light-mode .portrait-info {
+  background: rgba(255, 255, 255, 0.58);
+
+  border-color: rgba(15, 23, 42, 0.08);
+
+  color: #344054;
+}
+
+body.light-mode .floating-badge {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.72),
+      rgba(255, 255, 255, 0.35)
+    );
+
+  border-color: rgba(15, 23, 42, 0.08);
+
+  box-shadow:
+    0 15px 40px rgba(15, 23, 42, 0.10);
+}
+
+
+/* =====================================================
+   HERO MOBILE
+===================================================== */
+
+@media (max-width: 900px) {
+
+  .hero-visual {
+    min-height: 500px;
+  }
+
+  .portrait-glass {
+    width: min(370px, 85vw);
+  }
+
+  .badge-java {
+    left: 2%;
+  }
+
+  .badge-web {
+    right: 0;
+  }
+}
+
+@media (max-width: 520px) {
+
+  .floating-badge {
+    padding: 9px 12px;
+    font-size: 0.72rem;
+  }
+
+  .badge-java {
+    top: 12%;
+    left: -1%;
+  }
+
+  .badge-web {
+    right: -1%;
+  }
+
+  .badge-code {
+    bottom: 12%;
+  }
+}
