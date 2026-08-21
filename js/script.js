@@ -72,19 +72,23 @@ document.addEventListener("DOMContentLoaded", () => {
    MOUSE-REACTIVE GLASS
 ========================= */
 
-const glassElements = document.querySelectorAll(
-  ".navbar, .skill-card, .project-card, .experience-card, .portrait-glass"
-);
+const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
 
-glassElements.forEach((element) => {
-  element.addEventListener("mousemove", (e) => {
-    const rect = element.getBoundingClientRect();
+if (!isTouchDevice) {
+  const glassElements = document.querySelectorAll(
+    ".navbar, .skill-card, .project-card, .experience-card, .portrait-glass"
+  );
 
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+  glassElements.forEach((element) => {
+    element.addEventListener("mousemove", (e) => {
+      const rect = element.getBoundingClientRect();
 
-    element.style.setProperty("--mouse-x", `${x}px`);
-    element.style.setProperty("--mouse-y", `${y}px`);
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      element.style.setProperty("--mouse-x", `${x}px`);
+      element.style.setProperty("--mouse-y", `${y}px`);
+    });
   });
-});
+}
 });
