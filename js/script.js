@@ -127,4 +127,36 @@ if (heroVisual && portraitGlass && allowParallax) {
       "rotateX(0deg) rotateY(0deg) translateZ(0)";
   });
 }
+  /* =========================
+   ACTIVE NAV SECTION
+========================= */
+
+const sections = document.querySelectorAll("section[id]");
+const navLinks = document.querySelectorAll(".nav-links a");
+
+const navObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+
+      navLinks.forEach((link) => {
+        link.classList.remove("active");
+
+        if (
+          link.getAttribute("href") ===
+          `#${entry.target.id}`
+        ) {
+          link.classList.add("active");
+        }
+      });
+    });
+  },
+  {
+    rootMargin: "-40% 0px -50% 0px"
+  }
+);
+
+sections.forEach((section) => {
+  navObserver.observe(section);
+});
 });
