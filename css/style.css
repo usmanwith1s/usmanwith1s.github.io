@@ -1450,3 +1450,47 @@ body.light-mode .floating-badge {
 .portrait-info {
   z-index: 5;
 }
+/* =====================================================
+   THEME ICONS
+===================================================== */
+
+.theme-toggle {
+  overflow: hidden;
+}
+
+.theme-icon {
+  position: absolute;
+
+  width: 19px;
+  height: 19px;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  transition:
+    opacity 0.3s ease,
+    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.moon-icon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.sun-icon {
+  opacity: 0;
+  transform: rotate(-60deg) scale(0.55);
+}
+
+body.light-mode .moon-icon {
+  opacity: 0;
+  transform: rotate(60deg) scale(0.55);
+}
+
+body.light-mode .sun-icon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
