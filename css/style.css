@@ -3041,3 +3041,280 @@ body.light-mode .form-group textarea:focus {
     transform: none;
   }
 }
+/* =====================================================
+   3D ORBITING PROJECT ENTRANCE
+===================================================== */
+
+.projects-showcase {
+  perspective: 1400px;
+  perspective-origin: 50% 35%;
+}
+
+.project-orbit {
+  opacity: 0;
+
+  transform-style: preserve-3d;
+
+  /* starting state before JS activates it */
+  transform:
+    translate3d(0, -150px, -180px)
+    rotateX(28deg)
+    rotateY(-18deg)
+    rotateZ(-8deg)
+    scale(0.88);
+
+  will-change: transform, opacity;
+}
+
+
+/* -----------------------------------------------------
+   DIFFERENT ENTRY DIRECTIONS
+----------------------------------------------------- */
+
+.project-orbit:nth-child(1) {
+  --orbit-start-x: -120px;
+  --orbit-mid-x: 70px;
+
+  --orbit-rotate-y: -22deg;
+  --orbit-rotate-z: -9deg;
+
+  --orbit-delay: 0s;
+}
+
+.project-orbit:nth-child(2) {
+  --orbit-start-x: 130px;
+  --orbit-mid-x: -75px;
+
+  --orbit-rotate-y: 24deg;
+  --orbit-rotate-z: 10deg;
+
+  --orbit-delay: 0.10s;
+}
+
+.project-orbit:nth-child(3) {
+  --orbit-start-x: -100px;
+  --orbit-mid-x: 65px;
+
+  --orbit-rotate-y: -20deg;
+  --orbit-rotate-z: -8deg;
+
+  --orbit-delay: 0.20s;
+}
+
+
+/* -----------------------------------------------------
+   ACTIVATE ENTRANCE
+----------------------------------------------------- */
+
+.project-orbit.project-entered {
+  animation:
+    projectOrbitEntrance
+    1.35s
+    cubic-bezier(0.16, 1, 0.30, 1)
+    var(--orbit-delay)
+    forwards;
+}
+
+
+/* -----------------------------------------------------
+   ORBIT / LANDING ANIMATION
+----------------------------------------------------- */
+
+@keyframes projectOrbitEntrance {
+
+  0% {
+    opacity: 0;
+
+    transform:
+      translate3d(
+        var(--orbit-start-x),
+        -190px,
+        -220px
+      )
+      rotateX(36deg)
+      rotateY(var(--orbit-rotate-y))
+      rotateZ(var(--orbit-rotate-z))
+      scale(0.82);
+  }
+
+
+  28% {
+    opacity: 0.72;
+
+    transform:
+      translate3d(
+        var(--orbit-mid-x),
+        -115px,
+        -100px
+      )
+      rotateX(20deg)
+      rotateY(12deg)
+      rotateZ(5deg)
+      scale(0.90);
+  }
+
+
+  55% {
+    opacity: 1;
+
+    transform:
+      translate3d(
+        calc(var(--orbit-mid-x) * -0.35),
+        -45px,
+        25px
+      )
+      rotateX(-7deg)
+      rotateY(-7deg)
+      rotateZ(-2deg)
+      scale(1.025);
+  }
+
+
+  76% {
+    transform:
+      translate3d(
+        10px,
+        8px,
+        12px
+      )
+      rotateX(2deg)
+      rotateY(3deg)
+      rotateZ(0.6deg)
+      scale(0.995);
+  }
+
+
+  100% {
+    opacity: 1;
+
+    transform:
+      translate3d(0, 0, 0)
+      rotateX(0deg)
+      rotateY(0deg)
+      rotateZ(0deg)
+      scale(1);
+  }
+}
+
+
+/* =====================================================
+   SUBTLE FLOAT AFTER LANDING
+===================================================== */
+
+.project-orbit.project-settled {
+  opacity: 1;
+
+  animation:
+    projectIdleFloat
+    7s
+    ease-in-out
+    infinite;
+
+  will-change: transform;
+}
+
+
+/* give each project slightly different rhythm */
+
+.project-orbit.project-settled:nth-child(2) {
+  animation-delay: -2.1s;
+}
+
+.project-orbit.project-settled:nth-child(3) {
+  animation-delay: -4.2s;
+}
+
+
+@keyframes projectIdleFloat {
+
+  0%,
+  100% {
+    transform:
+      translate3d(0, 0, 0)
+      rotateX(0deg)
+      rotateY(0deg);
+  }
+
+  33% {
+    transform:
+      translate3d(-3px, -5px, 5px)
+      rotateX(0.25deg)
+      rotateY(-0.35deg);
+  }
+
+  66% {
+    transform:
+      translate3d(3px, -2px, 8px)
+      rotateX(-0.2deg)
+      rotateY(0.4deg);
+  }
+}
+
+
+/* pause idle movement while interacting */
+
+@media (hover: hover) and (pointer: fine) {
+
+  .project-orbit.project-settled:hover {
+    animation-play-state: paused;
+  }
+}
+/* =====================================================
+   MOBILE PROJECT MOTION
+===================================================== */
+
+@media (max-width: 768px) {
+
+  .projects-showcase {
+    perspective: none;
+  }
+
+  .project-orbit {
+    opacity: 0;
+
+    transform:
+      translateY(35px)
+      scale(0.98);
+
+    will-change: opacity, transform;
+  }
+
+  .project-orbit.project-entered {
+    animation:
+      mobileProjectEntrance
+      0.55s
+      ease
+      forwards;
+  }
+
+
+  @keyframes mobileProjectEntrance {
+
+    from {
+      opacity: 0;
+
+      transform:
+        translateY(35px)
+        scale(0.98);
+    }
+
+    to {
+      opacity: 1;
+
+      transform:
+        translateY(0)
+        scale(1);
+    }
+  }
+
+
+  .project-orbit.project-settled {
+    opacity: 1;
+
+    transform: none;
+
+    animation: none;
+
+    will-change: auto;
+  }
+}
