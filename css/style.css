@@ -3768,3 +3768,187 @@ body.light-mode .form-group textarea:focus {
     min-width: 0;
   }
 }
+/* =====================================================
+   EXPERIENCE TIMELINE SWEEP
+===================================================== */
+
+.experience-timeline {
+  perspective: 1400px;
+  perspective-origin: 50% 45%;
+}
+
+.timeline-sweep {
+  opacity: 1;
+  transform: none;
+  transform-style: preserve-3d;
+}
+
+/* hidden starting state */
+
+.timeline-sweep.timeline-waiting {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* alternate directions */
+
+.timeline-sweep:nth-child(1).timeline-waiting {
+  transform:
+    translate3d(-150px, 20px, -160px)
+    rotateY(-22deg)
+    rotateZ(-4deg)
+    scale(0.9);
+}
+
+.timeline-sweep:nth-child(2).timeline-waiting {
+  transform:
+    translate3d(150px, 25px, -170px)
+    rotateY(22deg)
+    rotateZ(4deg)
+    scale(0.9);
+}
+
+.timeline-sweep:nth-child(3).timeline-waiting {
+  transform:
+    translate3d(-140px, 25px, -160px)
+    rotateY(-20deg)
+    rotateZ(-3deg)
+    scale(0.9);
+}
+
+/* entrance */
+
+.timeline-sweep.timeline-entered {
+  animation:
+    timelineSweepEntrance
+    1.05s
+    cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+}
+
+.timeline-sweep:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.timeline-sweep:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.timeline-sweep:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+@keyframes timelineSweepEntrance {
+
+  0% {
+    opacity: 0;
+  }
+
+  48% {
+    opacity: 1;
+
+    transform:
+      translate3d(10px, -5px, 25px)
+      rotateY(-3deg)
+      rotateZ(0.8deg)
+      scale(1.02);
+  }
+
+  75% {
+    transform:
+      translate3d(-3px, 3px, 6px)
+      rotateY(1deg)
+      rotateZ(-0.3deg)
+      scale(0.995);
+  }
+
+  100% {
+    opacity: 1;
+
+    transform:
+      translate3d(0, 0, 0)
+      rotateY(0)
+      rotateZ(0)
+      scale(1);
+  }
+}
+
+/* marker pulse when card arrives */
+
+.timeline-sweep.timeline-entered .timeline-marker {
+  animation:
+    timelineMarkerPulse
+    0.75s
+    ease
+    0.35s
+    both;
+}
+
+@keyframes timelineMarkerPulse {
+
+  0% {
+    transform: scale(0.75);
+    opacity: 0.4;
+  }
+
+  55% {
+    transform: scale(1.3);
+    opacity: 1;
+
+    box-shadow:
+      0 0 0 8px rgba(124, 92, 255, 0.10),
+      0 0 30px rgba(124, 92, 255, 0.70);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
+/* =====================================================
+   MOBILE EXPERIENCE MOTION
+===================================================== */
+
+@media (max-width: 768px) {
+
+  .experience-timeline {
+    perspective: none;
+  }
+
+  .timeline-sweep.timeline-waiting {
+    opacity: 0;
+
+    transform:
+      translateY(26px)
+      scale(0.985);
+  }
+
+  .timeline-sweep.timeline-entered {
+    animation:
+      mobileTimelineEntrance
+      0.45s
+      ease
+      forwards;
+  }
+
+  @keyframes mobileTimelineEntrance {
+
+    from {
+      opacity: 0;
+
+      transform:
+        translateY(26px)
+        scale(0.985);
+    }
+
+    to {
+      opacity: 1;
+
+      transform:
+        translateY(0)
+        scale(1);
+    }
+  }
+}
