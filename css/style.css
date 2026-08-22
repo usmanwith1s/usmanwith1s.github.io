@@ -23,6 +23,18 @@
   padding: 0;
   box-sizing: border-box;
 }
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
 
 html {
   scroll-behavior: smooth;
@@ -3714,5 +3726,45 @@ body.light-mode .form-group textarea:focus {
         translateY(0)
         scale(1);
     }
+  }
+}
+@media (max-width: 768px) {
+
+  .site-header {
+    left: 12px;
+    right: 12px;
+
+    width: auto;
+    max-width: none;
+
+    transform: none;
+  }
+
+  .navbar {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+@media (max-width: 768px) {
+
+  .hero,
+  .section,
+  .about-layout,
+  .skills-layout,
+  .projects-showcase,
+  .experience-timeline,
+  .contact-layout {
+    max-width: 100%;
+  }
+
+  .glass-panel,
+  .project-feature,
+  .skill-group,
+  .about-main,
+  .about-stat,
+  .timeline-item,
+  .contact-form,
+  .contact-card {
+    min-width: 0;
   }
 }
