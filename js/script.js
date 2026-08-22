@@ -256,4 +256,84 @@ if (menuToggle && mobileNav) {
   });
 
 }
+  /* =========================
+   3D PROJECT ENTRANCE
+========================= */
+
+const orbitProjects =
+  document.querySelectorAll(".project-orbit");
+
+const prefersReducedMotion =
+  window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+if (!prefersReducedMotion) {
+
+  const projectEntranceObserver =
+    new IntersectionObserver(
+      (entries, observer) => {
+
+        entries.forEach((entry) => {
+
+          if (!entry.isIntersecting) return;
+
+          const project = entry.target;
+
+          project.classList.add(
+            "project-entered"
+          );
+
+
+          /* after entrance finishes,
+             switch to subtle idle float */
+
+          project.addEventListener(
+            "animationend",
+            (event) => {
+
+              if (
+                event.animationName !==
+                "projectOrbitEntrance"
+              ) {
+                return;
+              }
+
+              project.classList.remove(
+                "project-entered"
+              );
+
+              project.classList.add(
+                "project-settled"
+              );
+
+            },
+            {
+              once: true
+            }
+          );
+
+
+          observer.unobserve(project);
+
+        });
+
+      },
+      {
+        threshold: 0.18
+      }
+    );
+
+
+  orbitProjects.forEach((project) => {
+    projectEntranceObserver.observe(project);
+  });
+
+} else {
+
+  orbitProjects.forEach((project) => {
+    project.classList.add("project-settled");
+  });
+
+}
 });
