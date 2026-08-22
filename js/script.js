@@ -370,4 +370,40 @@ skillCards.forEach((card) => {
   card.classList.add("skill-waiting");
   skillObserver.observe(card);
 });
+  /* =========================
+   ABOUT ASSEMBLY
+========================= */
+
+const aboutElements =
+  document.querySelectorAll(
+    ".about-core, .about-fragment"
+  );
+
+const aboutObserver =
+  new IntersectionObserver(
+    (entries, observer) => {
+
+      entries.forEach((entry) => {
+
+        if (!entry.isIntersecting) return;
+
+        const element = entry.target;
+
+        element.classList.remove("about-waiting");
+        element.classList.add("about-entered");
+
+        observer.unobserve(element);
+
+      });
+
+    },
+    {
+      threshold: 0.18
+    }
+  );
+
+aboutElements.forEach((element) => {
+  element.classList.add("about-waiting");
+  aboutObserver.observe(element);
+});
 });
