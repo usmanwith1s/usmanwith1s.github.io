@@ -336,4 +336,38 @@ if (!prefersReducedMotion) {
   });
 
 }
+  /* =========================
+   SKILLS 3D DECK ENTRANCE
+========================= */
+
+const skillCards =
+  document.querySelectorAll(".skill-deck");
+
+const skillObserver =
+  new IntersectionObserver(
+    (entries, observer) => {
+
+      entries.forEach((entry) => {
+
+        if (!entry.isIntersecting) return;
+
+        const card = entry.target;
+
+        card.classList.remove("skill-waiting");
+        card.classList.add("skill-entered");
+
+        observer.unobserve(card);
+
+      });
+
+    },
+    {
+      threshold: 0.18
+    }
+  );
+
+skillCards.forEach((card) => {
+  card.classList.add("skill-waiting");
+  skillObserver.observe(card);
+});
 });
