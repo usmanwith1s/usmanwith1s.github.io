@@ -440,4 +440,40 @@ timelineCards.forEach((card) => {
   card.classList.add("timeline-waiting");
   timelineObserver.observe(card);
 });
+  /* =========================
+   CONTACT ENTRANCE
+========================= */
+
+const contactMotionElements =
+  document.querySelectorAll(
+    ".contact-drift, .contact-form-depth"
+  );
+
+const contactMotionObserver =
+  new IntersectionObserver(
+    (entries, observer) => {
+
+      entries.forEach((entry) => {
+
+        if (!entry.isIntersecting) return;
+
+        const element = entry.target;
+
+        element.classList.remove("contact-waiting");
+        element.classList.add("contact-entered");
+
+        observer.unobserve(element);
+
+      });
+
+    },
+    {
+      threshold: 0.18
+    }
+  );
+
+contactMotionElements.forEach((element) => {
+  element.classList.add("contact-waiting");
+  contactMotionObserver.observe(element);
+});
 });
