@@ -406,4 +406,38 @@ aboutElements.forEach((element) => {
   element.classList.add("about-waiting");
   aboutObserver.observe(element);
 });
+  /* =========================
+   EXPERIENCE SWEEP
+========================= */
+
+const timelineCards =
+  document.querySelectorAll(".timeline-sweep");
+
+const timelineObserver =
+  new IntersectionObserver(
+    (entries, observer) => {
+
+      entries.forEach((entry) => {
+
+        if (!entry.isIntersecting) return;
+
+        const card = entry.target;
+
+        card.classList.remove("timeline-waiting");
+        card.classList.add("timeline-entered");
+
+        observer.unobserve(card);
+
+      });
+
+    },
+    {
+      threshold: 0.18
+    }
+  );
+
+timelineCards.forEach((card) => {
+  card.classList.add("timeline-waiting");
+  timelineObserver.observe(card);
+});
 });
