@@ -4149,3 +4149,75 @@ body.light-mode .form-group textarea:focus {
     object-fit: cover;
     object-position: center;
 }
+/* =====================================================
+   PROJECT INTERACTIVE DEPTH
+===================================================== */
+
+.project-feature {
+    --mouse-x: 0;
+    --mouse-y: 0;
+}
+
+.project-feature .project-image {
+    overflow: hidden;
+    transform:
+        translate3d(
+            calc(var(--mouse-x) * -4px),
+            calc(var(--mouse-y) * -4px),
+            0
+        );
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-feature .project-image img {
+    transform:
+        scale(1.01)
+        translate3d(
+            calc(var(--mouse-x) * 7px),
+            calc(var(--mouse-y) * 7px),
+            0
+        );
+    transition:
+        transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+        filter 0.45s ease;
+}
+
+.project-feature .project-content {
+    transform:
+        translate3d(
+            calc(var(--mouse-x) * 2px),
+            calc(var(--mouse-y) * 2px),
+            0
+        );
+    transition:
+        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+
+/* subtle image enhancement */
+
+.project-feature:hover .project-image img {
+    transform:
+        scale(1.04)
+        translate3d(
+            calc(var(--mouse-x) * 7px),
+            calc(var(--mouse-y) * 7px),
+            0
+        );
+}
+
+
+/* no cursor tracking on touch devices */
+
+@media (hover: none), (max-width: 768px) {
+
+    .project-feature .project-image,
+    .project-feature .project-image img,
+    .project-feature .project-content {
+        transform: none;
+    }
+
+    .project-feature:hover .project-image img {
+        transform: scale(1.01);
+    }
+}
