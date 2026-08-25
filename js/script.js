@@ -476,4 +476,35 @@ contactMotionElements.forEach((element) => {
   element.classList.add("contact-waiting");
   contactMotionObserver.observe(element);
 });
+  /* =========================
+   PROJECT CURSOR DEPTH
+========================= */
+
+const projectCards =
+    document.querySelectorAll(".project-feature");
+
+projectCards.forEach((card) => {
+
+    card.addEventListener("mousemove", (event) => {
+
+        if (window.innerWidth <= 768) return;
+
+        const rect = card.getBoundingClientRect();
+
+        const x =
+            (event.clientX - rect.left) / rect.width - 0.5;
+
+        const y =
+            (event.clientY - rect.top) / rect.height - 0.5;
+
+        card.style.setProperty("--mouse-x", x);
+        card.style.setProperty("--mouse-y", y);
+    });
+
+    card.addEventListener("mouseleave", () => {
+
+        card.style.setProperty("--mouse-x", 0);
+        card.style.setProperty("--mouse-y", 0);
+    });
+});
 });
