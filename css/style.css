@@ -213,8 +213,8 @@ body {
 .hero-buttons {
   margin-top: 34px;
   display: flex;
-  gap: 12px;
-  flex-wrap: nowrap;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 
 /* ---------------- BUTTONS ---------------- */
