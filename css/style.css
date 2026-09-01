@@ -3528,28 +3528,12 @@ body.light-mode .form-group textarea:focus {
 .about-fragment {
   transform-style: preserve-3d;
 
-  opacity: 0;
-  transform: translateY(50px) scale(0.94);
-  transition:
-    opacity 0.8s ease,
-    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.about-fragment.reveal {
   opacity: 1;
   transform: translateY(0) scale(1);
-}
 
-.about-fragment:nth-child(1) {
-  transition-delay: 0.1s;
-}
-
-.about-fragment:nth-child(2) {
-  transition-delay: 0.25s;
-}
-
-.about-fragment:nth-child(3) {
-  transition-delay: 0.4s;
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
 }
 
 .about-fragment:hover {
