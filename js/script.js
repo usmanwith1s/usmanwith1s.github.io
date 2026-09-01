@@ -508,3 +508,27 @@ projectCards.forEach((card) => {
     });
 });
 });
+const aboutFragments = document.querySelectorAll(".about-fragment");
+
+const aboutObserver = new IntersectionObserver(
+    (entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                aboutFragments.forEach((fragment) => {
+                    fragment.classList.add("reveal");
+                });
+
+                aboutObserver.disconnect();
+            }
+        });
+    },
+    {
+        threshold: 0.25
+    }
+);
+
+const aboutSection = document.querySelector("#about");
+
+if (aboutSection) {
+    aboutObserver.observe(aboutSection);
+}
