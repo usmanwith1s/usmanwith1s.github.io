@@ -4221,3 +4221,28 @@ body.light-mode .form-group textarea:focus {
         transform: scale(1.01);
     }
 }
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  text-decoration: none;
+  color: var(--text);
+
+  font-weight: 800;
+  font-size: 1.4rem;
+}
+
+.logo img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+
+  transition:
+    transform 0.35s ease,
+    filter 0.35s ease;
+}
+
+.logo:hover img {
+  transform: rotate(-8deg) scale(1.08);
+}
