@@ -4394,3 +4394,26 @@ body.light-mode .particle-canvas {
     opacity: 0.45;
   }
 }
+
+/* =====================================================
+   BRIGHTER STAR / BULB PARTICLES
+===================================================== */
+.particle-canvas {
+  opacity: 1;
+  mix-blend-mode: screen;
+}
+
+body.light-mode .particle-canvas {
+  opacity: 0.72;
+  mix-blend-mode: multiply;
+}
+
+@media (max-width: 768px) {
+  .particle-canvas {
+    opacity: 0.86;
+  }
+
+  body.light-mode .particle-canvas {
+    opacity: 0.58;
+  }
+}
