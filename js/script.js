@@ -95,12 +95,18 @@ if (!isTouchDevice) {
    HERO PARALLAX
 ========================= */
 
+const clampUnit = (value) => Math.max(-1, Math.min(1, value));
+
 const heroVisual = document.querySelector("#heroVisual");
 const portraitGlass = document.querySelector(".portrait-glass");
 
 const allowParallax =
   !window.matchMedia("(pointer: coarse)").matches &&
   window.innerWidth > 900;
+
+// Shared pointer offset (-1..1 on each axis) read by the hero
+// star-trail canvas below to give its layers independent depth.
+const heroParallax = { x: 0, y: 0 };
 
 if (heroVisual && portraitGlass && allowParallax) {
   heroVisual.addEventListener("mousemove", (e) => {
@@ -120,11 +126,17 @@ if (heroVisual && portraitGlass && allowParallax) {
       rotateY(${rotateY}deg)
       translateZ(8px)
     `;
+
+    heroParallax.x = clampUnit((x - centerX) / centerX);
+    heroParallax.y = clampUnit((y - centerY) / centerY);
   });
 
   heroVisual.addEventListener("mouseleave", () => {
     portraitGlass.style.transform =
       "rotateX(0deg) rotateY(0deg) translateZ(0)";
+
+    heroParallax.x = 0;
+    heroParallax.y = 0;
   });
 }
   /* =========================
@@ -1240,6 +1252,456 @@ projectCards.forEach((card) => {
       redrawStatic();
     } else {
       particleState.raf = window.requestAnimationFrame(render);
+    }
+  }
+
+  /* =====================================================
+     HERO STAR-TRAIL CONSTELLATION
+     A flowing, comet-like trail of stars traces the logo
+     mark in the hero section, with two soft ambient spirals
+     drifting behind it for depth. Independent of the
+     page-wide cinematic star field above.
+  ===================================================== */
+
+  const heroSpiralCanvas = document.querySelector("#heroSpiralCanvas");
+  const heroSpiralContext = heroSpiralCanvas
+    ? heroSpiralCanvas.getContext("2d")
+    : null;
+
+  if (heroSpiralCanvas && heroSpiralContext && heroVisual) {
+    const hs = {
+      width: 0,
+      height: 0,
+      dpr: 1,
+      raf: 0,
+      lastTime: 0,
+      resizeTimer: 0,
+      reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+      palette: {
+        primary: [245, 249, 255],
+        secondary: [124, 92, 255],
+        tertiary: [45, 212, 191]
+      }
+    };
+
+    let logoPath = [];
+    let logoLength = 0;
+    let logoCumulative = [];
+    let logoReady = false;
+    let spiralA = [];
+    let spiralB = [];
+    let elapsed = 0;
+
+    const hsClamp = (value, min, max) => Math.max(min, Math.min(max, value));
+    const hsLerp = (a, b, amount) => a + (b - a) * amount;
+
+    const hsHexToRgb = (value) => {
+      const match = String(value || "").trim().match(/^#([0-9a-f]{6})$/i);
+      if (!match) return null;
+      return [
+        parseInt(match[1].slice(0, 2), 16),
+        parseInt(match[1].slice(2, 4), 16),
+        parseInt(match[1].slice(4, 6), 16)
+      ];
+    };
+
+    const hsColorToRgb = (value, fallback) => {
+      const hex = hsHexToRgb(value);
+      if (hex) return hex;
+      const match = String(value || "").match(
+        /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i
+      );
+      return match
+        ? [Number(match[1]), Number(match[2]), Number(match[3])]
+        : fallback;
+    };
+
+    const updateHeroPalette = () => {
+      const root = getComputedStyle(document.documentElement);
+      hs.palette.primary = hsColorToRgb(root.getPropertyValue("--text"), hs.palette.primary);
+      hs.palette.secondary = hsColorToRgb(root.getPropertyValue("--accent"), hs.palette.secondary);
+      hs.palette.tertiary = hsColorToRgb(root.getPropertyValue("--accent-2"), hs.palette.tertiary);
+    };
+
+    const hsAddLine = (points, x1, y1, x2, y2, count, z = 0) => {
+      for (let i = 0; i < count; i += 1) {
+        const t = count <= 1 ? 0 : i / (count - 1);
+        points.push({ x: hsLerp(x1, x2, t), y: hsLerp(y1, y2, t), z });
+      }
+    };
+
+    const hsAddEllipse = (points, cx, cy, rx, ry, count, z = 0) => {
+      for (let i = 0; i < count; i += 1) {
+        const angle = (i / count) * Math.PI * 2;
+        points.push({ x: cx + Math.cos(angle) * rx, y: cy + Math.sin(angle) * ry, z });
+      }
+    };
+
+    const buildFallbackPath = () => {
+      const points = [];
+      const s = hs.width <= 900 ? 0.72 : 1;
+      hsAddLine(points, -110 * s, -58 * s, -110 * s, 58 * s, 20);
+      hsAddLine(points, -110 * s, -58 * s, -58 * s, 2 * s, 15);
+      hsAddLine(points, -58 * s, 2 * s, -6 * s, -58 * s, 15);
+      hsAddLine(points, -6 * s, -58 * s, -6 * s, 58 * s, 20);
+      hsAddLine(points, 24 * s, -58 * s, 24 * s, 28 * s, 16);
+      hsAddEllipse(points, 72 * s, 28 * s, 46 * s, 26 * s, 26);
+      hsAddLine(points, 120 * s, 28 * s, 120 * s, -58 * s, 16);
+      return points;
+    };
+
+    const buildSpiral = (turns, rStart, rEnd, count, squish, z) => {
+      const points = [];
+      for (let i = 0; i < count; i += 1) {
+        const t = i / (count - 1);
+        const angle = t * Math.PI * 2 * turns;
+        const r = hsLerp(rStart, rEnd, t);
+        points.push({
+          x: Math.cos(angle) * r,
+          y: Math.sin(angle) * r * squish,
+          z
+        });
+      }
+      return points;
+    };
+
+    const orderByNearestNeighbor = (points) => {
+      if (points.length <= 2) return points;
+      const remaining = points.slice();
+
+      let startIndex = 0;
+      let startScore = Infinity;
+      remaining.forEach((point, index) => {
+        const score = point.y * 2 + point.x;
+        if (score < startScore) {
+          startScore = score;
+          startIndex = index;
+        }
+      });
+
+      const ordered = [remaining.splice(startIndex, 1)[0]];
+
+      while (remaining.length) {
+        const current = ordered[ordered.length - 1];
+        let nearestIndex = 0;
+        let nearestDist = Infinity;
+
+        for (let i = 0; i < remaining.length; i += 1) {
+          const dx = remaining[i].x - current.x;
+          const dy = remaining[i].y - current.y;
+          const dist = dx * dx + dy * dy;
+          if (dist < nearestDist) {
+            nearestDist = dist;
+            nearestIndex = i;
+          }
+        }
+
+        ordered.push(remaining.splice(nearestIndex, 1)[0]);
+      }
+
+      return ordered;
+    };
+
+    const finalizePath = (points) => {
+      logoPath = points;
+      logoCumulative = [0];
+      logoLength = 0;
+
+      for (let i = 1; i < logoPath.length; i += 1) {
+        const dx = logoPath[i].x - logoPath[i - 1].x;
+        const dy = logoPath[i].y - logoPath[i - 1].y;
+        logoLength += Math.hypot(dx, dy);
+        logoCumulative.push(logoLength);
+      }
+
+      if (logoPath.length > 2) {
+        const first = logoPath[0];
+        const last = logoPath[logoPath.length - 1];
+        logoLength += Math.hypot(first.x - last.x, first.y - last.y);
+        logoCumulative.push(logoLength);
+        logoPath = logoPath.concat([{ x: first.x, y: first.y, z: first.z }]);
+      }
+
+      logoReady = true;
+    };
+
+    const loadHeroLogoPath = () => {
+      const source = new Image();
+      source.decoding = "async";
+      source.src = "assets/images/usman-logo.png";
+
+      source.onload = () => {
+        const mobile = hs.width <= 900;
+        const sampleWidth = mobile ? 90 : 120;
+        const targetWidth = mobile ? 200 : 300;
+        const sourceRatio = source.naturalHeight / Math.max(1, source.naturalWidth);
+        const sampleHeight = Math.max(2, Math.round(sampleWidth * sourceRatio));
+
+        const offscreen = document.createElement("canvas");
+        offscreen.width = sampleWidth;
+        offscreen.height = sampleHeight;
+        const context = offscreen.getContext("2d", { willReadFrequently: true });
+        if (!context) {
+          finalizePath(orderByNearestNeighbor(buildFallbackPath()));
+          return;
+        }
+
+        context.clearRect(0, 0, sampleWidth, sampleHeight);
+        context.drawImage(source, 0, 0, sampleWidth, sampleHeight);
+
+        let pixels;
+        try {
+          pixels = context.getImageData(0, 0, sampleWidth, sampleHeight).data;
+        } catch (error) {
+          finalizePath(orderByNearestNeighbor(buildFallbackPath()));
+          return;
+        }
+
+        const raw = [];
+        for (let y = 0; y < sampleHeight; y += 1) {
+          for (let x = 0; x < sampleWidth; x += 1) {
+            const alpha = pixels[(y * sampleWidth + x) * 4 + 3];
+            if (alpha >= 105) {
+              raw.push({
+                x: (x / Math.max(1, sampleWidth - 1) - 0.5) * targetWidth,
+                y: (y / Math.max(1, sampleHeight - 1) - 0.5) * targetWidth * sourceRatio,
+                z: (alpha / 255) * 2 - 1
+              });
+            }
+          }
+        }
+
+        if (!raw.length) {
+          finalizePath(orderByNearestNeighbor(buildFallbackPath()));
+          return;
+        }
+
+        const maxPoints = mobile ? 150 : 220;
+        const stride = Math.max(1, Math.ceil(raw.length / maxPoints));
+        const sampled = raw.filter((_, index) => index % stride === 0);
+
+        finalizePath(orderByNearestNeighbor(sampled));
+      };
+
+      source.onerror = () => {
+        finalizePath(orderByNearestNeighbor(buildFallbackPath()));
+      };
+    };
+
+    const pointAtDistance = (distance) => {
+      if (!logoPath.length) return { x: 0, y: 0, z: 0 };
+
+      let d = distance % logoLength;
+      if (d < 0) d += logoLength;
+
+      for (let i = 1; i < logoCumulative.length; i += 1) {
+        if (logoCumulative[i] >= d) {
+          const segStart = logoCumulative[i - 1];
+          const segEnd = logoCumulative[i];
+          const segLength = Math.max(0.0001, segEnd - segStart);
+          const t = (d - segStart) / segLength;
+          const a = logoPath[i - 1];
+          const b = logoPath[i] || a;
+          return {
+            x: hsLerp(a.x, b.x, t),
+            y: hsLerp(a.y, b.y, t),
+            z: hsLerp(a.z || 0, b.z || 0, t)
+          };
+        }
+      }
+
+      return logoPath[0];
+    };
+
+    const runners = [0, 0.34, 0.67].map((offset, index) => ({
+      offset,
+      speed: 0.07 + index * 0.025
+    }));
+
+    const drawGlowPoint = (x, y, size, alpha, rgb) => {
+      const glow = size * 4.2;
+      const gradient = heroSpiralContext.createRadialGradient(x, y, 0, x, y, glow);
+      gradient.addColorStop(0, `rgba(${rgb.join(",")}, ${hsClamp(alpha, 0, 1)})`);
+      gradient.addColorStop(0.45, `rgba(${rgb.join(",")}, ${hsClamp(alpha * 0.35, 0, 1)})`);
+      gradient.addColorStop(1, `rgba(${rgb.join(",")}, 0)`);
+      heroSpiralContext.fillStyle = gradient;
+      heroSpiralContext.beginPath();
+      heroSpiralContext.arc(x, y, glow, 0, Math.PI * 2);
+      heroSpiralContext.fill();
+
+      heroSpiralContext.fillStyle = `rgba(${rgb.join(",")}, ${hsClamp(alpha * 1.3, 0, 1)})`;
+      heroSpiralContext.beginPath();
+      heroSpiralContext.arc(x, y, Math.max(0.6, size), 0, Math.PI * 2);
+      heroSpiralContext.fill();
+    };
+
+    const projectPoint = (point, centerX, centerY, scale, parallaxStrength) => {
+      const depth = point.z || 0;
+      const offsetX = heroParallax.x * depth * parallaxStrength;
+      const offsetY = heroParallax.y * depth * parallaxStrength * 0.6;
+      return {
+        x: centerX + point.x * scale + offsetX,
+        y: centerY + point.y * scale + offsetY
+      };
+    };
+
+    const drawAmbientSpiral = (points, centerX, centerY, scale, rgb, baseAlpha, rotation, parallaxStrength) => {
+      const cos = Math.cos(rotation);
+      const sin = Math.sin(rotation);
+
+      points.forEach((point, index) => {
+        const rx = point.x * cos - point.y * sin;
+        const ry = point.x * sin + point.y * cos;
+        const projected = projectPoint({ x: rx, y: ry, z: point.z }, centerX, centerY, scale, parallaxStrength);
+        const twinkle = 0.6 + Math.sin(elapsed * 0.0009 + index) * 0.4;
+        drawGlowPoint(projected.x, projected.y, 0.9 + twinkle * 0.5, baseAlpha * twinkle, rgb);
+      });
+    };
+
+    const drawLogoTrail = (centerX, centerY, scale, parallaxStrength) => {
+      if (!logoPath.length) return;
+
+      const primary = hs.palette.primary;
+      const secondary = hs.palette.secondary;
+
+      heroSpiralContext.beginPath();
+      logoPath.forEach((point, index) => {
+        const projected = projectPoint(point, centerX, centerY, scale, parallaxStrength);
+        if (index === 0) {
+          heroSpiralContext.moveTo(projected.x, projected.y);
+        } else {
+          heroSpiralContext.lineTo(projected.x, projected.y);
+        }
+      });
+      heroSpiralContext.strokeStyle = `rgba(${secondary.join(",")}, 0.16)`;
+      heroSpiralContext.lineWidth = 1.4;
+      heroSpiralContext.shadowBlur = 10;
+      heroSpiralContext.shadowColor = `rgba(${secondary.join(",")}, 0.5)`;
+      heroSpiralContext.stroke();
+      heroSpiralContext.shadowBlur = 0;
+
+      logoPath.forEach((point, index) => {
+        const projected = projectPoint(point, centerX, centerY, scale, parallaxStrength);
+        const twinkle = 0.55 + Math.sin(elapsed * 0.0016 + index * 0.7) * 0.45;
+        drawGlowPoint(projected.x, projected.y, 0.85, 0.24 * twinkle, primary);
+      });
+
+      if (!hs.reducedMotion) {
+        runners.forEach((runner, runnerIndex) => {
+          const headDistance = runner.offset * logoLength;
+          const tailSteps = 16;
+
+          for (let i = tailSteps; i >= 0; i -= 1) {
+            const distance = headDistance - i * (logoLength / 140);
+            const point = pointAtDistance(distance);
+            const projected = projectPoint(point, centerX, centerY, scale, parallaxStrength * 1.15);
+            const t = 1 - i / tailSteps;
+            const rgb = runnerIndex % 2 === 0 ? secondary : primary;
+            drawGlowPoint(projected.x, projected.y, 1.1 + t * 1.6, t * t * 0.85, rgb);
+          }
+        });
+      }
+    };
+
+    const renderHeroSpiral = (now) => {
+      const delta = Math.min(34, now - (hs.lastTime || now));
+      hs.lastTime = now;
+      elapsed = now;
+
+      heroSpiralContext.clearRect(0, 0, hs.width, hs.height);
+
+      const centerX = hs.width * 0.5;
+      const centerY = hs.height * 0.48;
+      const scale = hs.width <= 900 ? 0.85 : 1.15;
+
+      const rotationA = elapsed * 0.00006;
+      const rotationB = -elapsed * 0.00004;
+
+      drawAmbientSpiral(spiralA, centerX, centerY, scale, hs.palette.tertiary, 0.16, rotationA, 10);
+      drawAmbientSpiral(spiralB, centerX, centerY, scale, hs.palette.secondary, 0.14, rotationB, 14);
+
+      if (logoReady) {
+        drawLogoTrail(centerX, centerY, scale, 26);
+      }
+
+      if (!hs.reducedMotion) {
+        runners.forEach((runner) => {
+          runner.offset += (runner.speed * delta) / 1000;
+          if (runner.offset > 1) runner.offset -= 1;
+        });
+
+        hs.raf = window.requestAnimationFrame(renderHeroSpiral);
+      }
+    };
+
+    const redrawHeroStatic = () => {
+      if (hs.raf) {
+        window.cancelAnimationFrame(hs.raf);
+        hs.raf = 0;
+      }
+      hs.lastTime = performance.now();
+      renderHeroSpiral(hs.lastTime);
+    };
+
+    const updateHeroCanvasSize = () => {
+      const rect = heroVisual.getBoundingClientRect();
+      hs.width = Math.max(1, rect.width);
+      hs.height = Math.max(1, rect.height);
+      hs.dpr = Math.min(window.devicePixelRatio || 1, 1.55);
+
+      heroSpiralCanvas.width = Math.round(hs.width * hs.dpr);
+      heroSpiralCanvas.height = Math.round(hs.height * hs.dpr);
+      heroSpiralContext.setTransform(hs.dpr, 0, 0, hs.dpr, 0, 0);
+
+      spiralA = buildSpiral(2.1, 30, hs.width <= 900 ? 140 : 210, 80, 0.62, -1.4);
+      spiralB = buildSpiral(1.6, 20, hs.width <= 900 ? 110 : 170, 60, 0.7, -1.1);
+
+      loadHeroLogoPath();
+
+      if (hs.reducedMotion) redrawHeroStatic();
+    };
+
+    const handleHeroResize = () => {
+      window.clearTimeout(hs.resizeTimer);
+      hs.resizeTimer = window.setTimeout(updateHeroCanvasSize, 150);
+    };
+
+    window.addEventListener("resize", handleHeroResize, { passive: true });
+
+    if (typeof ResizeObserver === "function") {
+      const heroResizeObserver = new ResizeObserver(handleHeroResize);
+      heroResizeObserver.observe(heroVisual);
+    }
+
+    const heroReducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handleHeroReducedMotionChange = (event) => {
+      hs.reducedMotion = event.matches;
+      if (hs.reducedMotion) {
+        redrawHeroStatic();
+      } else if (!hs.raf) {
+        hs.raf = window.requestAnimationFrame(renderHeroSpiral);
+      }
+    };
+
+    if (typeof heroReducedMotionQuery.addEventListener === "function") {
+      heroReducedMotionQuery.addEventListener("change", handleHeroReducedMotionChange);
+    } else if (typeof heroReducedMotionQuery.addListener === "function") {
+      heroReducedMotionQuery.addListener(handleHeroReducedMotionChange);
+    }
+
+    const heroThemeObserver = new MutationObserver(updateHeroPalette);
+    heroThemeObserver.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"]
+    });
+
+    updateHeroCanvasSize();
+    updateHeroPalette();
+
+    if (hs.reducedMotion) {
+      redrawHeroStatic();
+    } else {
+      hs.raf = window.requestAnimationFrame(renderHeroSpiral);
     }
   }
 
