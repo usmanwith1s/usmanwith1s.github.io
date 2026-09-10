@@ -4349,9 +4349,10 @@ body.light-mode .form-group textarea:focus {
 
 }
 
-/* =========================
-   GLOBAL PARTICLE FIELD
-========================= */
+
+/* =====================================================
+   GLOBAL STAR / PARTICLE FIELD — CLEAN MULTI-SCENE SYSTEM
+===================================================== */
 
 .particle-canvas {
   position: fixed;
@@ -4360,7 +4361,7 @@ body.light-mode .form-group textarea:focus {
   height: 100%;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.92;
+  opacity: 0.84;
   mix-blend-mode: screen;
 }
 
@@ -4375,45 +4376,22 @@ main,
 }
 
 body.light-mode .particle-canvas {
-  opacity: 0.62;
+  opacity: 0.50;
   mix-blend-mode: multiply;
 }
 
 @media (max-width: 768px) {
   .particle-canvas {
-    opacity: 0.72;
+    opacity: 0.66;
   }
 
   body.light-mode .particle-canvas {
-    opacity: 0.48;
+    opacity: 0.40;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .particle-canvas {
-    opacity: 0.45;
-  }
-}
-
-/* =====================================================
-   BRIGHTER STAR / BULB PARTICLES
-===================================================== */
-.particle-canvas {
-  opacity: 1;
-  mix-blend-mode: screen;
-}
-
-body.light-mode .particle-canvas {
-  opacity: 0.72;
-  mix-blend-mode: multiply;
-}
-
-@media (max-width: 768px) {
-  .particle-canvas {
-    opacity: 0.86;
-  }
-
-  body.light-mode .particle-canvas {
-    opacity: 0.58;
+    opacity: 0.38;
   }
 }
