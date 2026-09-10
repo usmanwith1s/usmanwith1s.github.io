@@ -510,8 +510,9 @@ projectCards.forEach((card) => {
 
 
   /* =====================================================
-     MU + GAMING + CONTACT STAR FIELD
-     Clean formations tied to real page sections.
+     CINEMATIC STAR FIELD
+     Three large, clean formations in dedicated negative space:
+     MU identity -> gaming controller -> collaboration infinity.
   ===================================================== */
 
   const particleCanvas = document.querySelector("#particleCanvas");
@@ -532,15 +533,15 @@ projectCards.forEach((card) => {
       scrollY: window.scrollY || 0,
       mouseX: -1000,
       mouseY: -1000,
-      targetMouseX: -1000,
-      targetMouseY: -1000,
+      smoothMouseX: -1000,
+      smoothMouseY: -1000,
       lastTime: 0,
       resizeTimer: 0,
       scrollTick: 0,
       raf: 0,
       reducedMotion: reducedMotionQuery.matches,
       palette: {
-        primary: [255, 255, 255],
+        primary: [245, 249, 255],
         secondary: [124, 92, 255],
         tertiary: [45, 212, 191]
       }
@@ -556,9 +557,11 @@ projectCards.forEach((card) => {
     let logoLoaded = false;
     let sceneMetrics = [];
 
-    const aboutSection = document.querySelector("#about");
-    const projectsSection = document.querySelector("#projects");
-    const contactSection = document.querySelector("#contact");
+    const sceneElements = {
+      about: document.querySelector('[data-particle-scene="about"]'),
+      projects: document.querySelector('[data-particle-scene="projects"]'),
+      contact: document.querySelector('[data-particle-scene="contact"]')
+    };
 
     const clamp = (value, min, max) =>
       Math.max(min, Math.min(max, value));
@@ -571,250 +574,195 @@ projectCards.forEach((card) => {
     const lerp = (a, b, amount) =>
       a + (b - a) * amount;
 
-    const distance = (x1, y1, x2, y2) =>
-      Math.hypot(x1 - x2, y1 - y2);
-
-    const hexToRgb = (value) => {
-      const hex = String(value || "").trim();
-      const match = hex.match(/^#([0-9a-f]{6})$/i);
-      if (!match) return null;
-
-      return [
-        parseInt(match[1].slice(0, 2), 16),
-        parseInt(match[1].slice(2, 4), 16),
-        parseInt(match[1].slice(4, 6), 16)
-      ];
+    const cubicPoint = (p0, p1, p2, p3, t) => {
+      const u = 1 - t;
+      return {
+        x:
+          u * u * u * p0.x +
+          3 * u * u * t * p1.x +
+          3 * u * t * t * p2.x +
+          t * t * t * p3.x,
+        y:
+          u * u * u * p0.y +
+          3 * u * u * t * p1.y +
+          3 * u * t * t * p2.y +
+          t * t * t * p3.y
+      };
     };
 
-    const cssColorToRgb = (value, fallback) => {
-      const hex = hexToRgb(value);
-      if (hex) return hex;
-
-      const match = String(value || "").match(
-        /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i
-      );
-
-      if (match) {
-        return [
-          Number(match[1]),
-          Number(match[2]),
-          Number(match[3])
-        ];
+    const addCubic = (points, p0, p1, p2, p3, count, z = 0) => {
+      for (let i = 0; i < count; i += 1) {
+        const t = count <= 1 ? 0 : i / (count - 1);
+        const point = cubicPoint(p0, p1, p2, p3, t);
+        points.push({
+          x: point.x,
+          y: point.y,
+          z: z + Math.sin(t * Math.PI) * 3
+        });
       }
-
-      return fallback;
     };
 
-    const updatePalette = () => {
-      const styles = getComputedStyle(document.documentElement);
+    const addLine = (points, x1, y1, x2, y2, count, z = 0) => {
+      for (let i = 0; i < count; i += 1) {
+        const t = count <= 1 ? 0 : i / (count - 1);
+        points.push({
+          x: lerp(x1, x2, t),
+          y: lerp(y1, y2, t),
+          z: z + Math.sin(t * Math.PI) * 2
+        });
+      }
+    };
 
-      particleState.palette.primary = cssColorToRgb(
-        styles.getPropertyValue("--text"),
-        particleState.palette.primary
-      );
-
-      particleState.palette.secondary = cssColorToRgb(
-        styles.getPropertyValue("--accent"),
-        particleState.palette.secondary
-      );
-
-      particleState.palette.tertiary = cssColorToRgb(
-        styles.getPropertyValue("--accent-2"),
-        particleState.palette.tertiary
-      );
+    const addEllipse = (points, cx, cy, rx, ry, count, z = 0) => {
+      for (let i = 0; i < count; i += 1) {
+        const angle = (i / count) * Math.PI * 2;
+        points.push({
+          x: cx + Math.cos(angle) * rx,
+          y: cy + Math.sin(angle) * ry,
+          z: z + Math.sin(angle * 2) * 2
+        });
+      }
     };
 
     const particleCount = () => {
       const mobile = particleState.width <= 768;
-      const areaScale =
-        (particleState.width * particleState.height) /
-        (1440 * 900);
-
-      if (mobile) {
-        return clamp(Math.round(180 + areaScale * 90), 170, 255);
-      }
-
-      return clamp(Math.round(390 + areaScale * 140), 390, 570);
+      const area = (particleState.width * particleState.height) / (1440 * 900);
+      return mobile
+        ? clamp(Math.round(300 + area * 90), 280, 390)
+        : clamp(Math.round(670 + area * 170), 650, 860);
     };
+
+    const formationCount = () =>
+      particleState.width <= 768 ? 120 : 230;
 
     const createParticle = (index) => {
       const angle = Math.random() * Math.PI * 2;
-      const radius = Math.random();
-      const spread = Math.max(
-        particleState.width,
-        particleState.height
-      ) * (0.18 + radius * 0.66);
-
-      const activeSeed =
-        Math.sin(index * 12.9898) * 43758.5453;
-      const active =
-        activeSeed - Math.floor(activeSeed) <
-        (particleState.width <= 768 ? 0.56 : 0.50);
+      const spread = Math.max(particleState.width, particleState.height) *
+        (0.08 + Math.random() * 0.74);
 
       return {
         baseX: particleState.width * 0.5 + Math.cos(angle) * spread,
-        baseY: particleState.height * 0.5 + Math.sin(angle) * spread * 0.72,
-        vx: (Math.random() - 0.5) * 0.085,
-        vy: (Math.random() - 0.5) * 0.085,
+        baseY: particleState.height * 0.5 + Math.sin(angle) * spread * 0.68,
+        vx: (Math.random() - 0.5) * 0.030,
+        vy: (Math.random() - 0.5) * 0.030,
         phase: Math.random() * Math.PI * 2,
-        phaseSpeed: 0.00035 + Math.random() * 0.00055,
+        phaseSpeed: 0.00022 + Math.random() * 0.00034,
         z: Math.random() * 2 - 1,
-        size: 0.38 + Math.random() * 0.52,
-        alpha: 0.18 + Math.random() * 0.52,
+        size: 0.28 + Math.random() * 0.38,
+        alpha: 0.16 + Math.random() * 0.48,
+        twinkle: 0.7 + Math.random() * 1.6,
         hueMix: Math.random(),
-        active,
+        type: index % 7,
+        formation: index < formationCount(),
         tx: 0,
         ty: 0,
         tz: 0
       };
     };
 
-    const setParticleCount = () => {
+    const rebuildParticles = () => {
       particles.length = 0;
       const count = particleCount();
-
-      for (let index = 0; index < count; index += 1) {
-        particles.push(createParticle(index));
+      for (let i = 0; i < count; i += 1) {
+        particles.push(createParticle(i));
       }
     };
 
-    const makeOval = (cx, cy, rx, ry, count) => {
+    const makeController = (scale) => {
       const points = [];
+      const s = scale;
+      const p = (x, y) => ({ x: x * s, y: y * s });
 
+      // Large, recognizable controller silhouette.
+      addCubic(points, p(-182, -2), p(-169, -74), p(-122, -82), p(-76, -45), 30);
+      addCubic(points, p(-76, -45), p(-42, -18), p(42, -18), p(76, -45), 34);
+      addCubic(points, p(76, -45), p(122, -82), p(169, -74), p(182, -2), 30);
+      addCubic(points, p(182, -2), p(194, 53), p(178, 92), p(151, 94), 24);
+      addCubic(points, p(151, 94), p(125, 96), p(112, 56), p(92, 34), 18);
+      addCubic(points, p(92, 34), p(51, 13), p(-51, 13), p(-92, 34), 26);
+      addCubic(points, p(-92, 34), p(-112, 56), p(-125, 96), p(-151, 94), 18);
+      addCubic(points, p(-151, 94), p(-178, 92), p(-194, 53), p(-182, -2), 24);
+
+      // D-pad.
+      addLine(points, -126 * s, 0, -90 * s, 0, 11, 2);
+      addLine(points, -108 * s, -18 * s, -108 * s, 18 * s, 11, 2);
+
+      // Four face buttons.
+      addEllipse(points, 111 * s, -12 * s, 7 * s, 7 * s, 14, 4);
+      addEllipse(points, 132 * s, 8 * s, 7 * s, 7 * s, 14, 4);
+      addEllipse(points, 90 * s, 8 * s, 7 * s, 7 * s, 14, 4);
+      addEllipse(points, 111 * s, 29 * s, 7 * s, 7 * s, 14, 4);
+
+      // Two sticks.
+      addEllipse(points, -52 * s, 3 * s, 13 * s, 13 * s, 18, 3);
+      addEllipse(points, 50 * s, 3 * s, 13 * s, 13 * s, 18, 3);
+
+      // Tiny center light strip.
+      addLine(points, -13 * s, -6 * s, 13 * s, -6 * s, 14, 3);
+
+      return points;
+    };
+
+    const makeInfinity = (scale) => {
+      const points = [];
+      const s = scale;
+
+      // Main elegant collaboration loop.
+      const count = 190;
       for (let i = 0; i < count; i += 1) {
-        const angle = (i / count) * Math.PI * 2;
+        const t = (i / count) * Math.PI * 2;
+        const x = Math.sin(t) * 160 * s;
+        const y = Math.sin(t * 2) * 92 * s;
         points.push({
-          x: cx + Math.cos(angle) * rx,
-          y: cy + Math.sin(angle) * ry,
-          z: Math.sin(angle * 2) * 5
+          x,
+          y,
+          z: Math.cos(t * 2) * 5
         });
       }
 
-      return points;
-    };
+      // Two bright connection nodes.
+      addEllipse(points, -102 * s, 0, 11 * s, 11 * s, 20, 7);
+      addEllipse(points, 102 * s, 0, 11 * s, 11 * s, 20, 7);
 
-    const makeLine = (x1, y1, x2, y2, count) => {
-      const points = [];
+      // Small orbital arc accents.
+      addCubic(
+        points,
+        { x: -132 * s, y: -20 * s },
+        { x: -96 * s, y: -56 * s },
+        { x: -54 * s, y: -56 * s },
+        { x: -22 * s, y: -30 * s },
+        25,
+        2
+      );
+      addCubic(
+        points,
+        { x: 22 * s, y: 30 * s },
+        { x: 54 * s, y: 56 * s },
+        { x: 96 * s, y: 56 * s },
+        { x: 132 * s, y: 20 * s },
+        25,
+        2
+      );
 
-      for (let i = 0; i < count; i += 1) {
-        const t = count === 1 ? 0 : i / (count - 1);
-        points.push({
-          x: lerp(x1, x2, t),
-          y: lerp(y1, y2, t),
-          z: Math.sin(t * Math.PI) * 4
-        });
-      }
-
-      return points;
-    };
-
-    const makeGameController = (scale) => {
-      const points = [];
-      const w = 150 * scale;
-      const h = 76 * scale;
-      const x = 0;
-      const y = 0;
-
-      const outline = [];
-      const segments = 56;
-
-      for (let i = 0; i < segments; i += 1) {
-        const t = i / (segments - 1);
-        let px;
-        let py;
-
-        if (t < 0.25) {
-          const a = t / 0.25;
-          px = -w * 0.50 + a * w * 0.12;
-          py = h * 0.18 - Math.sin(a * Math.PI) * h * 0.05;
-        } else if (t < 0.50) {
-          const a = (t - 0.25) / 0.25;
-          px = -w * 0.38 + a * w * 0.76;
-          py = -h * 0.28 - Math.sin(a * Math.PI) * h * 0.04;
-        } else if (t < 0.75) {
-          const a = (t - 0.50) / 0.25;
-          px = w * 0.38 - a * w * 0.12;
-          py = -h * 0.28 + Math.sin(a * Math.PI) * h * 0.05;
-        } else {
-          const a = (t - 0.75) / 0.25;
-          px = w * 0.26 - a * w * 0.76;
-          py = h * 0.18 + Math.sin(a * Math.PI) * h * 0.02;
-        }
-
-        outline.push({ x: x + px, y: y + py, z: 0 });
-      }
-
-      points.push(...outline);
-
-      // D-pad
-      points.push(...makeLine(-39 * scale, -1 * scale, -18 * scale, -1 * scale, 10));
-      points.push(...makeLine(-28.5 * scale, -11.5 * scale, -28.5 * scale, 9.5 * scale, 10));
-
-      // Face buttons
-      points.push(...makeOval(34 * scale, -6 * scale, 6 * scale, 6 * scale, 12));
-      points.push(...makeOval(49 * scale, 7 * scale, 6 * scale, 6 * scale, 12));
-      points.push(...makeOval(19 * scale, 8 * scale, 6 * scale, 6 * scale, 12));
-      points.push(...makeOval(46 * scale, -20 * scale, 6 * scale, 6 * scale, 12));
-
-      // Center lights / buttons
-      points.push(...makeOval(0, 5 * scale, 10 * scale, 3.8 * scale, 14));
-      points.push(...makeOval(-1 * scale, -7 * scale, 8 * scale, 2.5 * scale, 10));
-
-      return points;
-    };
-
-    const makeContactMark = (scale) => {
-      const points = [];
-      const w = 148 * scale;
-      const h = 104 * scale;
-      const left = -w / 2;
-      const top = -h / 2;
-      const right = w / 2;
-      const bottom = h / 2;
-
-      // Speech bubble, deliberately asymmetric and more organic than a basic icon.
-      points.push(...makeLine(left + 20 * scale, top, right - 20 * scale, top, 34));
-      points.push(...makeLine(right, top + 18 * scale, right, bottom - 24 * scale, 24));
-      points.push(...makeLine(right - 18 * scale, bottom, left + 33 * scale, bottom, 26));
-      points.push(...makeLine(left + 16 * scale, bottom - 22 * scale, left, bottom - 54 * scale, 16));
-      points.push(...makeLine(left, bottom - 54 * scale, left, top + 18 * scale, 20));
-      points.push(...makeLine(left, top + 18 * scale, left + 20 * scale, top, 12));
-
-      // Three connection nodes.
-      points.push(...makeOval(-37 * scale, 9 * scale, 5 * scale, 5 * scale, 12));
-      points.push(...makeOval(-9 * scale, 9 * scale, 5 * scale, 5 * scale, 12));
-      points.push(...makeOval(19 * scale, 9 * scale, 5 * scale, 5 * scale, 12));
-      points.push(...makeLine(-32 * scale, 9 * scale, -14 * scale, 9 * scale, 9));
-      points.push(...makeLine(-4 * scale, 9 * scale, 14 * scale, 9 * scale, 9));
-
-      // Spark crossing the bubble corner — the final "let's build" signature.
-      points.push(...makeLine(27 * scale, 27 * scale, 45 * scale, 3 * scale, 13));
-      points.push(...makeLine(45 * scale, 3 * scale, 31 * scale, 3 * scale, 8));
-      points.push(...makeLine(31 * scale, 3 * scale, 27 * scale, 27 * scale, 13));
+      // A tiny four-point signature spark at the upper centre.
+      addLine(points, 0, -45 * s, 0, -25 * s, 6, 7);
+      addLine(points, -10 * s, -35 * s, 10 * s, -35 * s, 6, 7);
 
       return points;
     };
 
     const buildFallbackLogo = () => {
       const points = [];
-      const scale = particleState.width <= 768 ? 0.68 : 1;
+      const s = particleState.width <= 768 ? 0.78 : 1.18;
 
-      // Clean geometric fallback for "MU".
-      const addM = (offsetX) => {
-        points.push(...makeLine(offsetX - 46 * scale, -45 * scale, offsetX - 46 * scale, 45 * scale, 22));
-        points.push(...makeLine(offsetX - 46 * scale, -45 * scale, offsetX, 0, 18));
-        points.push(...makeLine(offsetX, 0, offsetX + 46 * scale, -45 * scale, 18));
-        points.push(...makeLine(offsetX + 46 * scale, -45 * scale, offsetX + 46 * scale, 45 * scale, 22));
-      };
-
-      const addU = (offsetX) => {
-        points.push(...makeLine(offsetX - 42 * scale, -45 * scale, offsetX - 42 * scale, 28 * scale, 22));
-        points.push(...makeOval(offsetX, 28 * scale, 42 * scale, 17 * scale, 28));
-        points.push(...makeLine(offsetX + 42 * scale, 28 * scale, offsetX + 42 * scale, -45 * scale, 22));
-      };
-
-      addM(-58 * scale);
-      addU(66 * scale);
+      // MU line-art fallback.
+      addLine(points, -120 * s, -62 * s, -120 * s, 62 * s, 25);
+      addLine(points, -120 * s, -62 * s, -62 * s, 3 * s, 18);
+      addLine(points, -62 * s, 3 * s, -4 * s, -62 * s, 18);
+      addLine(points, -4 * s, -62 * s, -4 * s, 62 * s, 25);
+      addLine(points, 28 * s, -62 * s, 28 * s, 32 * s, 20);
+      addEllipse(points, 80 * s, 32 * s, 52 * s, 30 * s, 30);
+      addLine(points, 132 * s, 32 * s, 132 * s, -62 * s, 20);
       return points;
     };
 
@@ -824,24 +772,15 @@ projectCards.forEach((card) => {
       source.src = "assets/images/usman-logo.png";
 
       source.onload = () => {
-        const sourceWidth = Math.max(1, source.naturalWidth);
-        const sourceHeight = Math.max(1, source.naturalHeight);
         const mobile = particleState.width <= 768;
-        const targetWidth = mobile ? 168 : 270;
-        const sampleWidth = mobile ? 105 : 145;
-        const sampleHeight = Math.max(
-          2,
-          Math.round(sampleWidth * (sourceHeight / sourceWidth))
-        );
-
+        const sampleWidth = mobile ? 120 : 170;
+        const targetWidth = mobile ? 250 : 410;
+        const sourceRatio = source.naturalHeight / Math.max(1, source.naturalWidth);
+        const sampleHeight = Math.max(2, Math.round(sampleWidth * sourceRatio));
         const offscreen = document.createElement("canvas");
         offscreen.width = sampleWidth;
         offscreen.height = sampleHeight;
-
-        const context = offscreen.getContext("2d", {
-          willReadFrequently: true
-        });
-
+        const context = offscreen.getContext("2d", { willReadFrequently: true });
         if (!context) return;
 
         context.clearRect(0, 0, sampleWidth, sampleHeight);
@@ -849,52 +788,37 @@ projectCards.forEach((card) => {
 
         let pixels;
         try {
-          pixels = context.getImageData(
-            0,
-            0,
-            sampleWidth,
-            sampleHeight
-          ).data;
+          pixels = context.getImageData(0, 0, sampleWidth, sampleHeight).data;
         } catch (error) {
           sceneData.about = buildFallbackLogo();
           return;
         }
 
-        const candidates = [];
-
+        const edge = [];
         for (let y = 0; y < sampleHeight; y += 1) {
           for (let x = 0; x < sampleWidth; x += 1) {
-            const alpha = pixels[
-              (y * sampleWidth + x) * 4 + 3
-            ];
-
-            if (alpha < 90) continue;
-
-            const nx = x / Math.max(1, sampleWidth - 1) - 0.5;
-            const ny = y / Math.max(1, sampleHeight - 1) - 0.5;
-
-            candidates.push({
-              x: nx * targetWidth,
-              y: ny * targetWidth * (sampleHeight / sampleWidth),
-              z: (alpha / 255 - 0.5) * 8
-            });
+            const alpha = pixels[(y * sampleWidth + x) * 4 + 3];
+            if (alpha >= 105) {
+              edge.push({
+                x:
+                  (x / Math.max(1, sampleWidth - 1) - 0.5) * targetWidth,
+                y:
+                  (y / Math.max(1, sampleHeight - 1) - 0.5) *
+                  targetWidth * sourceRatio,
+                z: (alpha / 255) * 5
+              });
+            }
           }
         }
 
-        if (!candidates.length) {
+        if (!edge.length) {
           sceneData.about = buildFallbackLogo();
           return;
         }
 
-        const maxPoints = mobile ? 125 : 205;
-        const stride = Math.max(
-          1,
-          Math.ceil(candidates.length / maxPoints)
-        );
-
-        sceneData.about = candidates.filter(
-          (_, index) => index % stride === 0
-        );
+        const max = mobile ? 120 : 230;
+        const stride = Math.max(1, Math.ceil(edge.length / max));
+        sceneData.about = edge.filter((_, index) => index % stride === 0);
         logoLoaded = true;
         refreshSceneMetrics();
       };
@@ -913,31 +837,30 @@ projectCards.forEach((card) => {
 
     const refreshSceneMetrics = () => {
       const mobile = particleState.width <= 768;
-      const viewport = particleState.height;
+      const metrics = [];
 
-      sceneMetrics = [
-        {
-          key: "about",
-          top: pageTop(aboutSection),
-          lead: mobile ? viewport * 0.19 : viewport * 0.27,
-          x: mobile ? particleState.width * 0.50 : particleState.width * 0.78,
-          scale: mobile ? 0.74 : 1
-        },
-        {
-          key: "projects",
-          top: pageTop(projectsSection),
-          lead: mobile ? viewport * 0.18 : viewport * 0.20,
-          x: mobile ? particleState.width * 0.50 : particleState.width * 0.76,
-          scale: mobile ? 0.62 : 0.92
-        },
-        {
-          key: "contact",
-          top: pageTop(contactSection),
-          lead: mobile ? viewport * 0.20 : viewport * 0.22,
-          x: mobile ? particleState.width * 0.50 : particleState.width * 0.77,
-          scale: mobile ? 0.64 : 0.94
-        }
+      const config = [
+        ["about", mobile ? 0.50 : 0.72, mobile ? 0.88 : 1.10],
+        ["projects", mobile ? 0.50 : 0.30, mobile ? 0.60 : 0.88],
+        ["contact", mobile ? 0.50 : 0.70, mobile ? 0.64 : 0.94]
       ];
+
+      config.forEach(([key, xRatio, scale]) => {
+        const element = sceneElements[key];
+        if (!element) return;
+        const rect = element.getBoundingClientRect();
+        const top = rect.top + (window.scrollY || window.pageYOffset || 0);
+        metrics.push({
+          key,
+          element,
+          top,
+          height: rect.height,
+          x: particleState.width * xRatio,
+          scale
+        });
+      });
+
+      sceneMetrics = metrics;
     };
 
     const updateScrollBounds = () => {
@@ -949,64 +872,69 @@ projectCards.forEach((card) => {
       refreshSceneMetrics();
     };
 
-    const getSceneState = (scene, metric) => {
-      if (!metric || !scene.length) {
-        return { amount: 0, x: 0, y: 0 };
-      }
+    const getSceneState = (points, metric) => {
+      if (!metric || !points.length) return { amount: 0, x: 0, y: 0 };
 
-      const mobile = particleState.width <= 768;
-      const start = metric.top - particleState.height * 0.58;
-      const end = metric.top + particleState.height * (mobile ? 0.52 : 0.70);
+      const centerPage = metric.top + metric.height * 0.50;
+      const windowSize = particleState.height * (particleState.width <= 768 ? 0.82 : 0.70);
+      const start = centerPage - windowSize;
+      const end = centerPage + windowSize;
       const raw = clamp(
         (particleState.scrollY - start) / Math.max(1, end - start),
         0,
         1
       );
 
-      // A focused window: particles gather, hold, then dissolve before content gets busy.
-      const amount =
-        smoothstep(clamp(raw / 0.32, 0, 1)) *
-        (1 - smoothstep(clamp((raw - 0.58) / 0.42, 0, 1)));
+      const rise = smoothstep(clamp(raw / 0.30, 0, 1));
+      const fall = 1 - smoothstep(clamp((raw - 0.58) / 0.42, 0, 1));
+      const amount = rise * fall;
 
-      const targetY =
-        metric.top - particleState.scrollY + metric.lead;
+      const targetY = centerPage - particleState.scrollY;
 
       return {
         amount,
         x: metric.x,
-        y: clamp(targetY, particleState.height * 0.16, particleState.height * 0.78)
+        y: clamp(targetY, particleState.height * 0.20, particleState.height * 0.80)
       };
     };
 
     const getActiveScene = () => {
-      const candidates = sceneMetrics.map((metric) => {
-        const points = sceneData[metric.key];
-        const state = getSceneState(points, metric);
-        return {
-          metric,
-          points,
-          ...state
-        };
+      let best = {
+        metric: null,
+        points: [],
+        amount: 0,
+        x: 0,
+        y: 0
+      };
+
+      sceneMetrics.forEach((metric) => {
+        const state = getSceneState(sceneData[metric.key], metric);
+        if (state.amount > best.amount) {
+          best = {
+            metric,
+            points: sceneData[metric.key],
+            ...state
+          };
+        }
       });
 
-      return candidates.reduce(
-        (best, current) =>
-          current.amount > best.amount ? current : best,
-        { metric: null, points: [], amount: 0, x: 0, y: 0 }
-      );
+      return best;
     };
 
     const assignTargets = (points, centerX, centerY, scale) => {
       if (!points.length) return;
 
-      particles.forEach((particle, index) => {
-        const point = points[index % points.length];
-        const jitter = particle.active ? 0.45 : 0;
+      const formationParticles = particles.filter((particle) => particle.formation);
+      const pointCount = points.length;
 
-        particle.tx = centerX + point.x * scale +
-          (Math.sin(index * 1.73) * jitter);
-        particle.ty = centerY + point.y * scale +
-          (Math.cos(index * 1.17) * jitter);
+      formationParticles.forEach((particle, index) => {
+        const point = points[Math.min(
+          pointCount - 1,
+          Math.floor(index * pointCount / formationParticles.length)
+        )];
+
+        particle.tx = centerX + point.x * scale;
+        particle.ty = centerY + point.y * scale;
         particle.tz = point.z || 0;
       });
     };
@@ -1014,18 +942,10 @@ projectCards.forEach((card) => {
     const updateCanvasSize = () => {
       particleState.width = window.innerWidth;
       particleState.height = window.innerHeight;
-      particleState.dpr = Math.min(
-        window.devicePixelRatio || 1,
-        1.55
-      );
+      particleState.dpr = Math.min(window.devicePixelRatio || 1, 1.55);
 
-      particleCanvas.width = Math.round(
-        particleState.width * particleState.dpr
-      );
-      particleCanvas.height = Math.round(
-        particleState.height * particleState.dpr
-      );
-
+      particleCanvas.width = Math.round(particleState.width * particleState.dpr);
+      particleCanvas.height = Math.round(particleState.height * particleState.dpr);
       particleContext.setTransform(
         particleState.dpr,
         0,
@@ -1036,42 +956,107 @@ projectCards.forEach((card) => {
       );
 
       updateScrollBounds();
-      updatePalette();
-      setParticleCount();
+      rebuildParticles();
 
-      sceneData.projects = makeGameController(
-        particleState.width <= 768 ? 0.72 : 0.95
+      sceneData.projects = makeController(
+        particleState.width <= 768 ? 0.53 : 0.98
       );
-      sceneData.contact = makeContactMark(
-        particleState.width <= 768 ? 0.62 : 0.92
+      sceneData.contact = makeInfinity(
+        particleState.width <= 768 ? 0.70 : 1.04
       );
 
-      if (!logoLoaded) {
-        sceneData.about = buildFallbackLogo();
-      }
-
+      if (!logoLoaded) sceneData.about = buildFallbackLogo();
       loadLogoPoints();
     };
 
-    const drawStar = (x, y, size, alpha, rgb, glowing) => {
-      const glow = size * (glowing ? 4.2 : 2.2);
+    const hexToRgb = (value) => {
+      const match = String(value || "").trim().match(/^#([0-9a-f]{6})$/i);
+      if (!match) return null;
+      return [
+        parseInt(match[1].slice(0, 2), 16),
+        parseInt(match[1].slice(2, 4), 16),
+        parseInt(match[1].slice(4, 6), 16)
+      ];
+    };
 
+    const cssColorToRgb = (value, fallback) => {
+      const hex = hexToRgb(value);
+      if (hex) return hex;
+      const match = String(value || "").match(
+        /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i
+      );
+      return match
+        ? [Number(match[1]), Number(match[2]), Number(match[3])]
+        : fallback;
+    };
+
+    const updatePalette = () => {
+      const root = getComputedStyle(document.documentElement);
+      particleState.palette.primary = cssColorToRgb(
+        root.getPropertyValue("--text"),
+        particleState.palette.primary
+      );
+      particleState.palette.secondary = cssColorToRgb(
+        root.getPropertyValue("--accent"),
+        particleState.palette.secondary
+      );
+      particleState.palette.tertiary = cssColorToRgb(
+        root.getPropertyValue("--accent-2"),
+        particleState.palette.tertiary
+      );
+    };
+
+    const drawStar = (x, y, size, alpha, rgb, type, twinkle) => {
+      const isTwinkle = type === 1 || type === 4;
+      const pulse = 0.78 + Math.sin(twinkle) * 0.22;
+      const glow = size * (isTwinkle ? 4.8 : 3.2) * pulse;
+
+      const gradient = particleContext.createRadialGradient(
+        x,
+        y,
+        0,
+        x,
+        y,
+        glow
+      );
+      gradient.addColorStop(
+        0,
+        `rgba(${rgb.join(",")}, ${Math.min(0.42, alpha * 0.42)})`
+      );
+      gradient.addColorStop(1, `rgba(${rgb.join(",")}, 0)`);
+
+      particleContext.fillStyle = gradient;
       particleContext.beginPath();
-      particleContext.fillStyle = `rgba(${rgb.join(",")}, ${alpha * 0.12})`;
       particleContext.arc(x, y, glow, 0, Math.PI * 2);
       particleContext.fill();
 
-      particleContext.beginPath();
-      particleContext.fillStyle = `rgba(${rgb.join(",")}, ${Math.min(1, alpha * 1.18)})`;
-      particleContext.arc(x, y, size, 0, Math.PI * 2);
-      particleContext.fill();
+      particleContext.fillStyle = `rgba(${rgb.join(",")}, ${Math.min(1, alpha * 1.15)})`;
+
+      if (isTwinkle) {
+        const spike = size * (type === 4 ? 5.0 : 3.6);
+        particleContext.beginPath();
+        particleContext.moveTo(x, y - spike);
+        particleContext.lineTo(x + size * 0.72, y);
+        particleContext.lineTo(x, y + spike);
+        particleContext.lineTo(x - size * 0.72, y);
+        particleContext.closePath();
+        particleContext.fill();
+      } else if (type === 2 || type === 5) {
+        const d = size * 1.25;
+        particleContext.save();
+        particleContext.translate(x, y);
+        particleContext.rotate(Math.PI / 4);
+        particleContext.fillRect(-d / 2, -d / 2, d, d);
+        particleContext.restore();
+      } else {
+        particleContext.beginPath();
+        particleContext.arc(x, y, Math.max(0.55, size), 0, Math.PI * 2);
+        particleContext.fill();
+      }
     };
 
     const render = (now) => {
-      const delta = Math.min(
-        34,
-        now - (particleState.lastTime || now)
-      );
+      const delta = Math.min(34, now - (particleState.lastTime || now));
       particleState.lastTime = now;
 
       particleContext.clearRect(
@@ -1081,21 +1066,21 @@ projectCards.forEach((card) => {
         particleState.height
       );
 
-      particleState.targetMouseX = lerp(
-        particleState.targetMouseX,
+      particleState.smoothMouseX = lerp(
+        particleState.smoothMouseX,
         particleState.mouseX,
-        0.10
+        0.085
       );
-      particleState.targetMouseY = lerp(
-        particleState.targetMouseY,
+      particleState.smoothMouseY = lerp(
+        particleState.smoothMouseY,
         particleState.mouseY,
-        0.10
+        0.085
       );
 
       const activeScene = getActiveScene();
       const formationAmount = activeScene.amount;
 
-      if (formationAmount > 0.001 && activeScene.points.length) {
+      if (formationAmount > 0.001) {
         assignTargets(
           activeScene.points,
           activeScene.x,
@@ -1104,99 +1089,78 @@ projectCards.forEach((card) => {
         );
       }
 
+      const mouseX = particleState.smoothMouseX;
+      const mouseY = particleState.smoothMouseY;
+      const mouseRadius = particleState.width <= 768 ? 0 : 150;
+
       particles.forEach((particle, index) => {
         particle.phase += particle.phaseSpeed * delta;
 
         if (!particleState.reducedMotion) {
-          particle.baseX += particle.vx * delta * 0.035;
-          particle.baseY += particle.vy * delta * 0.035;
+          particle.baseX += particle.vx * delta;
+          particle.baseY += particle.vy * delta;
 
-          const xLimit = particleState.width * 0.15;
-          const yLimit = particleState.height * 0.15;
-
-          if (particle.baseX > particleState.width + xLimit) particle.baseX = -xLimit;
-          if (particle.baseX < -xLimit) particle.baseX = particleState.width + xLimit;
-          if (particle.baseY > particleState.height + yLimit) particle.baseY = -yLimit;
-          if (particle.baseY < -yLimit) particle.baseY = particleState.height + yLimit;
+          const marginX = particleState.width * 0.08;
+          const marginY = particleState.height * 0.08;
+          if (particle.baseX > particleState.width + marginX) particle.baseX = -marginX;
+          if (particle.baseX < -marginX) particle.baseX = particleState.width + marginX;
+          if (particle.baseY > particleState.height + marginY) particle.baseY = -marginY;
+          if (particle.baseY < -marginY) particle.baseY = particleState.height + marginY;
         }
 
-        let x = particle.baseX + Math.cos(particle.phase) * 2.0;
-        let y = particle.baseY + Math.sin(particle.phase * 0.9) * 2.0;
+        let x = particle.baseX + Math.cos(particle.phase) * 0.75;
+        let y = particle.baseY + Math.sin(particle.phase * 0.86) * 0.75;
 
-        if (formationAmount > 0.001 && particle.active) {
-          x = lerp(x, particle.tx, formationAmount);
-          y = lerp(y, particle.ty, formationAmount);
+        if (particle.formation && formationAmount > 0.001) {
+          const strength = smoothstep(formationAmount);
+          x = lerp(x, particle.tx, strength);
+          y = lerp(y, particle.ty, strength);
         }
 
-        // Gentle cursor repulsion. The cursor never grabs the formation; it only bends it.
-        const cursorDistance = distance(
-          x,
-          y,
-          particleState.targetMouseX,
-          particleState.targetMouseY
-        );
+        if (mouseRadius > 0 && mouseX > -900) {
+          const dx = x - mouseX;
+          const dy = y - mouseY;
+          const dist = Math.hypot(dx, dy);
 
-        const repelRadius = 112;
-
-        if (
-          cursorDistance < repelRadius &&
-          particleState.targetMouseX > -900
-        ) {
-          const safeDistance = Math.max(cursorDistance, 1);
-          const strength =
-            Math.pow(1 - safeDistance / repelRadius, 2) *
-            (formationAmount > 0.12 ? 13 : 18);
-
-          x +=
-            ((x - particleState.targetMouseX) / safeDistance) *
-            strength;
-          y +=
-            ((y - particleState.targetMouseY) / safeDistance) *
-            strength;
+          if (dist < mouseRadius && dist > 0.001) {
+            const influence = Math.pow(1 - dist / mouseRadius, 2);
+            const push = influence * (formationAmount > 0.18 ? 20 : 28);
+            x += (dx / dist) * push;
+            y += (dy / dist) * push;
+          }
         }
 
-        // Tiny parallax in depth, never enough to make the shape messy.
-        const depth = particle.z * 6 +
-          (formationAmount * particle.tz);
-        const parallaxX = depth * 0.35;
-        const parallaxY = depth * 0.12;
+        const depth = particle.z * 5 + (formationAmount * particle.tz * 0.18);
+        x += depth * 0.32;
+        y += depth * 0.11;
 
-        x += parallaxX;
-        y += parallaxY;
-
+        const primary = particleState.palette.primary;
         const secondary = particleState.palette.secondary;
         const tertiary = particleState.palette.tertiary;
-        const primary = particleState.palette.primary;
-        const mix =
-          (Math.sin(index * 0.17 + now * 0.00013) + 1) / 2;
-        const colorA = particle.hueMix > 0.48 ? secondary : primary;
-        const colorB = particle.hueMix > 0.48 ? tertiary : secondary;
-
+        const hue = (Math.sin(index * 0.21 + now * 0.00018) + 1) / 2;
+        const a = particle.hueMix > 0.52 ? secondary : primary;
+        const b = particle.hueMix > 0.52 ? tertiary : secondary;
         const rgb = [
-          Math.round(lerp(colorA[0], colorB[0], mix)),
-          Math.round(lerp(colorA[1], colorB[1], mix)),
-          Math.round(lerp(colorA[2], colorB[2], mix))
+          Math.round(lerp(a[0], b[0], hue)),
+          Math.round(lerp(a[1], b[1], hue)),
+          Math.round(lerp(a[2], b[2], hue))
         ];
 
-        const sceneBoost = formationAmount * 0.34;
+        const isFormation = particle.formation && formationAmount > 0.12;
         const alpha = clamp(
-          particle.alpha * (0.50 + sceneBoost),
-          0.05,
-          0.82
+          particle.alpha * (isFormation ? 1.15 : 0.62) * (0.90 + formationAmount * 0.20),
+          0.035,
+          0.92
         );
-
-        const size =
-          particle.size *
-          (formationAmount > 0.15 && particle.active ? 1.12 : 1);
-
+        const size = particle.size * (isFormation ? 1.08 : 0.82);
         drawStar(
           x,
           y,
           size,
           alpha,
           rgb,
-          particle.active &&
-            (formationAmount > 0.25 || index % 11 === 0)
+          particle.type,
+          particle.phase * particle.twinkle
         );
       });
 
@@ -1210,14 +1174,12 @@ projectCards.forEach((card) => {
         window.cancelAnimationFrame(particleState.raf);
         particleState.raf = 0;
       }
-
       particleState.lastTime = performance.now();
       render(particleState.lastTime);
     };
 
     const handleMouseMove = (event) => {
       if (window.matchMedia("(pointer: coarse)").matches) return;
-
       particleState.mouseX = event.clientX;
       particleState.mouseY = event.clientY;
     };
@@ -1229,10 +1191,8 @@ projectCards.forEach((card) => {
 
     const handleScroll = () => {
       if (particleState.scrollTick) return;
-
       particleState.scrollTick = window.requestAnimationFrame(() => {
-        particleState.scrollY =
-          window.scrollY || window.pageYOffset || 0;
+        particleState.scrollY = window.scrollY || window.pageYOffset || 0;
         particleState.scrollTick = 0;
       });
     };
@@ -1242,17 +1202,13 @@ projectCards.forEach((card) => {
       particleState.resizeTimer = window.setTimeout(() => {
         logoLoaded = false;
         updateCanvasSize();
-
-        if (particleState.reducedMotion) {
-          redrawStatic();
-        }
-      }, 100);
+        if (particleState.reducedMotion) redrawStatic();
+      }, 120);
     };
 
     const handleReducedMotionChange = (event) => {
       particleState.reducedMotion = event.matches;
       particleState.lastTime = performance.now();
-
       if (particleState.reducedMotion) {
         redrawStatic();
       } else if (!particleState.raf) {
@@ -1260,32 +1216,18 @@ projectCards.forEach((card) => {
       }
     };
 
-    window.addEventListener("mousemove", handleMouseMove, {
-      passive: true
-    });
-    window.addEventListener("mouseleave", handleMouseLeave, {
-      passive: true
-    });
-    window.addEventListener("scroll", handleScroll, {
-      passive: true
-    });
-    window.addEventListener("resize", handleResize, {
-      passive: true
-    });
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("mouseleave", handleMouseLeave, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleResize, { passive: true });
 
     if (typeof reducedMotionQuery.addEventListener === "function") {
-      reducedMotionQuery.addEventListener(
-        "change",
-        handleReducedMotionChange
-      );
+      reducedMotionQuery.addEventListener("change", handleReducedMotionChange);
     } else if (typeof reducedMotionQuery.addListener === "function") {
       reducedMotionQuery.addListener(handleReducedMotionChange);
     }
 
-    const themeObserver = new MutationObserver(() => {
-      updatePalette();
-    });
-
+    const themeObserver = new MutationObserver(updatePalette);
     themeObserver.observe(document.body, {
       attributes: true,
       attributeFilter: ["class"]
