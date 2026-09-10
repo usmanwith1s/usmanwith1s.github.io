@@ -1094,11 +1094,11 @@ body.light-mode .experience-card:hover {
 
   0%,
   100% {
-    transform: translateY(0) rotate(-3deg);
+    transform: translateY(0) rotate(-3deg) perspective(600px) rotateY(0deg);
   }
 
   50% {
-    transform: translateY(-13px) rotate(1deg);
+    transform: translateY(-13px) rotate(1deg) perspective(600px) rotateY(22deg);
   }
 }
 
@@ -1106,11 +1106,11 @@ body.light-mode .experience-card:hover {
 
   0%,
   100% {
-    transform: translateY(0) rotate(3deg);
+    transform: translateY(0) rotate(3deg) perspective(600px) rotateY(0deg);
   }
 
   50% {
-    transform: translateY(14px) rotate(-1deg);
+    transform: translateY(14px) rotate(-1deg) perspective(600px) rotateY(-20deg);
   }
 }
 
@@ -1118,11 +1118,11 @@ body.light-mode .experience-card:hover {
 
   0%,
   100% {
-    transform: translateY(0) rotate(-2deg);
+    transform: translateY(0) rotate(-2deg) perspective(600px) rotateY(0deg);
   }
 
   50% {
-    transform: translateY(-10px) rotate(2deg);
+    transform: translateY(-10px) rotate(2deg) perspective(600px) rotateY(18deg);
   }
 }
 
@@ -4423,5 +4423,110 @@ body.light-mode .particle-canvas {
 @media (prefers-reduced-motion: reduce) {
   .particle-canvas {
     opacity: 0.34;
+  }
+}
+
+/* =====================================================
+   HERO STAR-TRAIL CONSTELLATION
+   A flowing, comet-like trail of stars that traces the
+   logo mark, with two soft ambient spirals drifting behind
+   it for depth. Sits behind the portrait and badges.
+===================================================== */
+
+.hero-spiral-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+
+  z-index: 0;
+  pointer-events: none;
+
+  mix-blend-mode: screen;
+  opacity: 0.95;
+}
+
+body.light-mode .hero-spiral-canvas {
+  opacity: 0.60;
+  mix-blend-mode: multiply;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-spiral-canvas {
+    opacity: 0.55;
+  }
+}
+
+/* ---------------- 3D ORBIT RING ---------------- */
+
+.orbit-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+
+  width: min(500px, 92%);
+  aspect-ratio: 1;
+
+  transform: translate(-50%, -50%);
+  transform-style: preserve-3d;
+  perspective: 900px;
+
+  pointer-events: none;
+  z-index: 0;
+}
+
+.orbit-ring-layer {
+  position: absolute;
+  inset: 0;
+
+  border-radius: 50%;
+  border: 1px solid rgba(124, 92, 255, 0.22);
+
+  transform-style: preserve-3d;
+  animation: orbitSpin 16s linear infinite;
+}
+
+.ring-a {
+  transform: rotateX(72deg) rotateZ(0deg);
+  border-color: rgba(124, 92, 255, 0.26);
+}
+
+.ring-b {
+  inset: 7%;
+  transform: rotateX(72deg) rotateZ(60deg);
+  border-color: rgba(45, 212, 191, 0.22);
+  animation-duration: 22s;
+  animation-direction: reverse;
+}
+
+.ring-c {
+  inset: 14%;
+  transform: rotateX(72deg) rotateZ(120deg);
+  border-color: rgba(248, 250, 252, 0.14);
+  animation-duration: 28s;
+}
+
+@keyframes orbitSpin {
+  0% {
+    transform: rotateX(72deg) rotateZ(var(--ring-offset, 0deg)) rotateY(0deg);
+  }
+  100% {
+    transform: rotateX(72deg) rotateZ(var(--ring-offset, 0deg)) rotateY(360deg);
+  }
+}
+
+.ring-a { --ring-offset: 0deg; }
+.ring-b { --ring-offset: 60deg; }
+.ring-c { --ring-offset: 120deg; }
+
+@media (max-width: 900px) {
+  .orbit-ring {
+    width: min(400px, 88%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit-ring-layer {
+    animation: none;
   }
 }
