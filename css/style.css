@@ -4348,3 +4348,49 @@ body.light-mode .form-group textarea:focus {
     }
 
 }
+
+
+/* =========================================
+   HAND SURVIVOR PROJECT PLACEHOLDER
+========================================= */
+
+.project-placeholder {
+    width: 100%;
+    min-height: 300px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 12px;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(0, 255, 180, 0.15),
+            transparent 65%
+        ),
+        linear-gradient(
+            135deg,
+            #111,
+            #1b1b1b
+        );
+
+    border-radius: 18px;
+    text-align: center;
+}
+
+.project-placeholder span {
+    font-size: 4rem;
+}
+
+.project-placeholder strong {
+    font-size: 1.4rem;
+    letter-spacing: 0.12em;
+}
+
+.project-placeholder small {
+    font-size: 0.85rem;
+    opacity: 0.65;
+}
