@@ -3112,6 +3112,15 @@ body.light-mode .form-group textarea:focus {
 
   --orbit-delay: 0.20s;
 }
+.project-orbit:nth-child(4) {
+  --orbit-start-x: 110px;
+  --orbit-mid-x: -60px;
+
+  --orbit-rotate-y: 20deg;
+  --orbit-rotate-z: 8deg;
+
+  --orbit-delay: 0.30s;
+}
 
 
 /* -----------------------------------------------------
