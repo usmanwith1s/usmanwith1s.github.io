@@ -523,8 +523,10 @@ projectCards.forEach((card) => {
 
   /* =====================================================
      CINEMATIC STAR FIELD
-     Three large, clean formations in dedicated negative space:
-     MU identity -> gaming controller -> collaboration infinity.
+     Two large, centered, full-screen formations that
+     assemble as you scroll: MU identity -> gaming controller.
+     Both react to the pointer and use a connected flowing
+     trail rather than a scattered dot cloud.
   ===================================================== */
 
   const particleCanvas = document.querySelector("#particleCanvas");
@@ -562,8 +564,11 @@ projectCards.forEach((card) => {
     const particles = [];
     const sceneData = {
       about: [],
-      projects: [],
-      contact: []
+      projects: []
+    };
+    const sceneOutlines = {
+      about: [],
+      projects: []
     };
 
     let logoLoaded = false;
@@ -571,8 +576,7 @@ projectCards.forEach((card) => {
 
     const sceneElements = {
       about: document.querySelector('[data-particle-scene="about"]'),
-      projects: document.querySelector('[data-particle-scene="projects"]'),
-      contact: document.querySelector('[data-particle-scene="contact"]')
+      projects: document.querySelector('[data-particle-scene="projects"]')
     };
 
     const clamp = (value, min, max) =>
@@ -636,16 +640,53 @@ projectCards.forEach((card) => {
       }
     };
 
+    const orderChain = (points) => {
+      if (points.length <= 2) return points;
+      const remaining = points.slice();
+
+      let startIndex = 0;
+      let startScore = Infinity;
+      remaining.forEach((point, index) => {
+        const score = point.y * 2 + point.x;
+        if (score < startScore) {
+          startScore = score;
+          startIndex = index;
+        }
+      });
+
+      const ordered = [remaining.splice(startIndex, 1)[0]];
+
+      while (remaining.length) {
+        const current = ordered[ordered.length - 1];
+        let nearestIndex = 0;
+        let nearestDist = Infinity;
+
+        for (let i = 0; i < remaining.length; i += 1) {
+          const dx = remaining[i].x - current.x;
+          const dy = remaining[i].y - current.y;
+          const dist = dx * dx + dy * dy;
+          if (dist < nearestDist) {
+            nearestDist = dist;
+            nearestIndex = i;
+          }
+        }
+
+        ordered.push(remaining.splice(nearestIndex, 1)[0]);
+      }
+
+      return ordered;
+    };
+
     const particleCount = () => {
       const mobile = particleState.width <= 768;
       const area = (particleState.width * particleState.height) / (1440 * 900);
       return mobile
-        ? clamp(Math.round(300 + area * 90), 280, 390)
-        : clamp(Math.round(670 + area * 170), 650, 860);
+        ? clamp(Math.round(420 + area * 120), 380, 540)
+        : clamp(Math.round(980 + area * 240), 900, 1180);
     };
 
     const formationCount = () =>
-      particleState.width <= 768 ? 120 : 230;
+      particleState.width <= 768 ? 260 : 540;
 
     const createParticle = (index) => {
       const angle = Math.random() * Math.PI * 2;
@@ -682,85 +723,40 @@ projectCards.forEach((card) => {
 
     const makeController = (scale) => {
       const points = [];
+      const body = [];
       const s = scale;
       const p = (x, y) => ({ x: x * s, y: y * s });
 
-      // Large, recognizable controller silhouette.
-      addCubic(points, p(-182, -2), p(-169, -74), p(-122, -82), p(-76, -45), 30);
-      addCubic(points, p(-76, -45), p(-42, -18), p(42, -18), p(76, -45), 34);
-      addCubic(points, p(76, -45), p(122, -82), p(169, -74), p(182, -2), 30);
-      addCubic(points, p(182, -2), p(194, 53), p(178, 92), p(151, 94), 24);
-      addCubic(points, p(151, 94), p(125, 96), p(112, 56), p(92, 34), 18);
-      addCubic(points, p(92, 34), p(51, 13), p(-51, 13), p(-92, 34), 26);
-      addCubic(points, p(-92, 34), p(-112, 56), p(-125, 96), p(-151, 94), 18);
-      addCubic(points, p(-151, 94), p(-178, 92), p(-194, 53), p(-182, -2), 24);
+      // Large, recognizable controller silhouette (kept as its own
+      // sub-path so it can be traced with a connecting glow line).
+      addCubic(body, p(-182, -2), p(-169, -74), p(-122, -82), p(-76, -45), 46);
+      addCubic(body, p(-76, -45), p(-42, -18), p(42, -18), p(76, -45), 52);
+      addCubic(body, p(76, -45), p(122, -82), p(169, -74), p(182, -2), 46);
+      addCubic(body, p(182, -2), p(194, 53), p(178, 92), p(151, 94), 36);
+      addCubic(body, p(151, 94), p(125, 96), p(112, 56), p(92, 34), 28);
+      addCubic(body, p(92, 34), p(51, 13), p(-51, 13), p(-92, 34), 40);
+      addCubic(body, p(-92, 34), p(-112, 56), p(-125, 96), p(-151, 94), 28);
+      addCubic(body, p(-151, 94), p(-178, 92), p(-194, 53), p(-182, -2), 36);
+      points.push(...body);
 
       // D-pad.
-      addLine(points, -126 * s, 0, -90 * s, 0, 11, 2);
-      addLine(points, -108 * s, -18 * s, -108 * s, 18 * s, 11, 2);
+      addLine(points, -126 * s, 0, -90 * s, 0, 16, 2);
+      addLine(points, -108 * s, -18 * s, -108 * s, 18 * s, 16, 2);
 
       // Four face buttons.
-      addEllipse(points, 111 * s, -12 * s, 7 * s, 7 * s, 14, 4);
-      addEllipse(points, 132 * s, 8 * s, 7 * s, 7 * s, 14, 4);
-      addEllipse(points, 90 * s, 8 * s, 7 * s, 7 * s, 14, 4);
-      addEllipse(points, 111 * s, 29 * s, 7 * s, 7 * s, 14, 4);
+      addEllipse(points, 111 * s, -12 * s, 7 * s, 7 * s, 20, 4);
+      addEllipse(points, 132 * s, 8 * s, 7 * s, 7 * s, 20, 4);
+      addEllipse(points, 90 * s, 8 * s, 7 * s, 7 * s, 20, 4);
+      addEllipse(points, 111 * s, 29 * s, 7 * s, 7 * s, 20, 4);
 
       // Two sticks.
-      addEllipse(points, -52 * s, 3 * s, 13 * s, 13 * s, 18, 3);
-      addEllipse(points, 50 * s, 3 * s, 13 * s, 13 * s, 18, 3);
+      addEllipse(points, -52 * s, 3 * s, 13 * s, 13 * s, 26, 3);
+      addEllipse(points, 50 * s, 3 * s, 13 * s, 13 * s, 26, 3);
 
       // Tiny center light strip.
-      addLine(points, -13 * s, -6 * s, 13 * s, -6 * s, 14, 3);
+      addLine(points, -13 * s, -6 * s, 13 * s, -6 * s, 18, 3);
 
-      return points;
-    };
-
-    const makeInfinity = (scale) => {
-      const points = [];
-      const s = scale;
-
-      // Main elegant collaboration loop.
-      const count = 190;
-      for (let i = 0; i < count; i += 1) {
-        const t = (i / count) * Math.PI * 2;
-        const x = Math.sin(t) * 160 * s;
-        const y = Math.sin(t * 2) * 92 * s;
-        points.push({
-          x,
-          y,
-          z: Math.cos(t * 2) * 5
-        });
-      }
-
-      // Two bright connection nodes.
-      addEllipse(points, -102 * s, 0, 11 * s, 11 * s, 20, 7);
-      addEllipse(points, 102 * s, 0, 11 * s, 11 * s, 20, 7);
-
-      // Small orbital arc accents.
-      addCubic(
-        points,
-        { x: -132 * s, y: -20 * s },
-        { x: -96 * s, y: -56 * s },
-        { x: -54 * s, y: -56 * s },
-        { x: -22 * s, y: -30 * s },
-        25,
-        2
-      );
-      addCubic(
-        points,
-        { x: 22 * s, y: 30 * s },
-        { x: 54 * s, y: 56 * s },
-        { x: 96 * s, y: 56 * s },
-        { x: 132 * s, y: 20 * s },
-        25,
-        2
-      );
-
-      // A tiny four-point signature spark at the upper centre.
-      addLine(points, 0, -45 * s, 0, -25 * s, 6, 7);
-      addLine(points, -10 * s, -35 * s, 10 * s, -35 * s, 6, 7);
-
-      return points;
+      return { points, outline: body };
     };
 
     const buildFallbackLogo = () => {
@@ -783,17 +779,28 @@ projectCards.forEach((card) => {
       source.decoding = "async";
       source.src = "assets/images/usman-logo.png";
 
+      const useFallback = () => {
+        const ordered = orderChain(buildFallbackLogo());
+        sceneData.about = ordered;
+        sceneOutlines.about = ordered;
+        logoLoaded = true;
+        refreshSceneMetrics();
+      };
+
       source.onload = () => {
         const mobile = particleState.width <= 768;
-        const sampleWidth = mobile ? 120 : 170;
-        const targetWidth = mobile ? 250 : 410;
+        const sampleWidth = mobile ? 170 : 240;
+        const targetWidth = mobile ? 340 : 620;
         const sourceRatio = source.naturalHeight / Math.max(1, source.naturalWidth);
         const sampleHeight = Math.max(2, Math.round(sampleWidth * sourceRatio));
         const offscreen = document.createElement("canvas");
         offscreen.width = sampleWidth;
         offscreen.height = sampleHeight;
         const context = offscreen.getContext("2d", { willReadFrequently: true });
-        if (!context) return;
+        if (!context) {
+          useFallback();
+          return;
+        }
 
         context.clearRect(0, 0, sampleWidth, sampleHeight);
         context.drawImage(source, 0, 0, sampleWidth, sampleHeight);
@@ -802,7 +809,7 @@ projectCards.forEach((card) => {
         try {
           pixels = context.getImageData(0, 0, sampleWidth, sampleHeight).data;
         } catch (error) {
-          sceneData.about = buildFallbackLogo();
+          useFallback();
           return;
         }
 
@@ -824,21 +831,22 @@ projectCards.forEach((card) => {
         }
 
         if (!edge.length) {
-          sceneData.about = buildFallbackLogo();
+          useFallback();
           return;
         }
 
-        const max = mobile ? 120 : 230;
+        const max = mobile ? 320 : 560;
         const stride = Math.max(1, Math.ceil(edge.length / max));
-        sceneData.about = edge.filter((_, index) => index % stride === 0);
+        const sampled = edge.filter((_, index) => index % stride === 0);
+        const ordered = orderChain(sampled);
+
+        sceneData.about = ordered;
+        sceneOutlines.about = ordered;
         logoLoaded = true;
         refreshSceneMetrics();
       };
 
-      source.onerror = () => {
-        sceneData.about = buildFallbackLogo();
-        refreshSceneMetrics();
-      };
+      source.onerror = useFallback;
     };
 
     const pageTop = (element) => {
@@ -852,9 +860,8 @@ projectCards.forEach((card) => {
       const metrics = [];
 
       const config = [
-        ["about", mobile ? 0.50 : 0.72, mobile ? 0.88 : 1.10],
-        ["projects", mobile ? 0.50 : 0.30, mobile ? 0.60 : 0.88],
-        ["contact", mobile ? 0.50 : 0.70, mobile ? 0.64 : 0.94]
+        ["about", 0.50, mobile ? 1.05 : 1.9],
+        ["projects", 0.50, mobile ? 1.3 : 1.7]
       ];
 
       config.forEach(([key, xRatio, scale]) => {
@@ -970,14 +977,17 @@ projectCards.forEach((card) => {
       updateScrollBounds();
       rebuildParticles();
 
-      sceneData.projects = makeController(
-        particleState.width <= 768 ? 0.53 : 0.98
+      const controller = makeController(
+        particleState.width <= 768 ? 0.62 : 1.12
       );
-      sceneData.contact = makeInfinity(
-        particleState.width <= 768 ? 0.70 : 1.04
-      );
+      sceneData.projects = controller.points;
+      sceneOutlines.projects = controller.outline;
 
-      if (!logoLoaded) sceneData.about = buildFallbackLogo();
+      if (!logoLoaded) {
+        const ordered = orderChain(buildFallbackLogo());
+        sceneData.about = ordered;
+        sceneOutlines.about = ordered;
+      }
       loadLogoPoints();
     };
 
@@ -1101,9 +1111,54 @@ projectCards.forEach((card) => {
         );
       }
 
+      if (activeScene.metric && formationAmount > 0.04) {
+        const glowRgb = particleState.palette.secondary;
+        const glowRadius =
+          (activeScene.metric.key === "about" ? 300 : 260) *
+          activeScene.metric.scale *
+          0.9;
+
+        const glowGradient = particleContext.createRadialGradient(
+          activeScene.x,
+          activeScene.y,
+          0,
+          activeScene.x,
+          activeScene.y,
+          glowRadius
+        );
+        glowGradient.addColorStop(0, `rgba(${glowRgb.join(",")}, ${0.11 * formationAmount})`);
+        glowGradient.addColorStop(0.55, `rgba(${glowRgb.join(",")}, ${0.04 * formationAmount})`);
+        glowGradient.addColorStop(1, `rgba(${glowRgb.join(",")}, 0)`);
+        particleContext.fillStyle = glowGradient;
+        particleContext.beginPath();
+        particleContext.arc(activeScene.x, activeScene.y, glowRadius, 0, Math.PI * 2);
+        particleContext.fill();
+
+        const outline = sceneOutlines[activeScene.metric.key];
+        if (outline && outline.length) {
+          const outlineScale = activeScene.metric.scale;
+          particleContext.beginPath();
+          outline.forEach((point, index) => {
+            const px = activeScene.x + point.x * outlineScale;
+            const py = activeScene.y + point.y * outlineScale;
+            if (index === 0) {
+              particleContext.moveTo(px, py);
+            } else {
+              particleContext.lineTo(px, py);
+            }
+          });
+          particleContext.strokeStyle = `rgba(${glowRgb.join(",")}, ${0.20 * formationAmount})`;
+          particleContext.lineWidth = 1.6;
+          particleContext.shadowBlur = 16;
+          particleContext.shadowColor = `rgba(${glowRgb.join(",")}, ${0.4 * formationAmount})`;
+          particleContext.stroke();
+          particleContext.shadowBlur = 0;
+        }
+      }
+
       const mouseX = particleState.smoothMouseX;
       const mouseY = particleState.smoothMouseY;
-      const mouseRadius = particleState.width <= 768 ? 0 : 150;
+      const mouseRadius = particleState.width <= 768 ? 0 : 220;
 
       particles.forEach((particle, index) => {
         particle.phase += particle.phaseSpeed * delta;
@@ -1136,7 +1191,7 @@ projectCards.forEach((card) => {
 
           if (dist < mouseRadius && dist > 0.001) {
             const influence = Math.pow(1 - dist / mouseRadius, 2);
-            const push = influence * (formationAmount > 0.18 ? 20 : 28);
+            const push = influence * (formationAmount > 0.18 ? 30 : 40);
             x += (dx / dist) * push;
             y += (dy / dist) * push;
           }
