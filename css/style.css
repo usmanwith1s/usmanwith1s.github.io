@@ -4376,21 +4376,19 @@ main,
 }
 
 /* Real visual breathing room for the particle artwork.
-   The canvas sits behind these transparent spaces, so the
-   formations never have to sit on top of cards or text. */
+   The canvas sits behind these transparent spaces, giving each
+   formation its own full-screen moment as you scroll into it. */
 .particle-scene-space {
   position: relative;
   width: 100%;
-  height: 300px;
+  height: 100vh;
+  height: 100svh;
   pointer-events: none;
 }
 
 .projects-particle-space {
-  height: 330px;
-}
-
-.contact-particle-space {
-  height: 320px;
+  height: 100vh;
+  height: 100svh;
 }
 
 body.light-mode .particle-canvas {
@@ -4404,15 +4402,13 @@ body.light-mode .particle-canvas {
   }
 
   .particle-scene-space {
-    height: 220px;
+    height: 78vh;
+    height: 78svh;
   }
 
   .projects-particle-space {
-    height: 245px;
-  }
-
-  .contact-particle-space {
-    height: 235px;
+    height: 78vh;
+    height: 78svh;
   }
 
   body.light-mode .particle-canvas {
