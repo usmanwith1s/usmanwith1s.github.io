@@ -2182,6 +2182,365 @@ body.intro-active {
     transition-delay:1.15s;
 }
 /* =====================================================
+   TOOLBOX
+===================================================== */
+
+.toolbox-section {
+    position:relative;
+    z-index:22;
+    width:100%;
+    min-height:100vh;
+    padding:130px 6vw 100px;
+    background:#050505;
+    color:#eeeeeb;
+    overflow:hidden;
+    box-shadow:0 -30px 80px rgba(0,0,0,.45);
+}
+
+.toolbox-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-bottom:30px;
+    border-bottom:1px solid rgba(255,255,255,.12);
+}
+
+.toolbox-index {
+    font-size:8px;
+    letter-spacing:.28em;
+    color:rgba(255,255,255,.3);
+}
+
+.toolbox-main {
+    display:grid;
+    grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);
+    gap:8vw;
+    align-items:end;
+    padding:100px 0 110px;
+}
+
+.toolbox-title {
+    display:flex;
+    flex-direction:column;
+    font-family:"Arial Black",Impact,sans-serif;
+    font-size:clamp(80px,13vw,210px);
+    line-height:.76;
+    letter-spacing:-.055em;
+    font-weight:900;
+}
+
+.toolbox-title span {
+    display:block;
+    opacity:0;
+    transform:translateY(100px);
+    filter:blur(15px);
+    transition:
+        opacity 1.1s ease,
+        transform 1.2s cubic-bezier(.16,1,.3,1),
+        filter 1.1s ease;
+}
+
+.toolbox-title em {
+    font-family:"Times New Roman",Georgia,serif;
+    font-weight:400;
+    font-style:italic;
+    letter-spacing:-.045em;
+    color:rgba(255,255,255,.55);
+}
+
+.toolbox-section.visible .toolbox-title span {
+    opacity:1;
+    transform:translateY(0);
+    filter:blur(0);
+}
+
+.toolbox-section.visible .toolbox-title span:nth-child(1) {
+    transition-delay:.05s;
+}
+
+.toolbox-section.visible .toolbox-title span:nth-child(2) {
+    transition-delay:.18s;
+}
+
+.toolbox-intro {
+    max-width:430px;
+    padding-bottom:8px;
+    opacity:0;
+    transform:translateX(70px);
+    filter:blur(8px);
+    transition:
+        opacity 1s ease,
+        transform 1.1s cubic-bezier(.16,1,.3,1),
+        filter 1s ease;
+}
+
+.toolbox-section.visible .toolbox-intro {
+    opacity:1;
+    transform:translateX(0);
+    filter:blur(0);
+    transition-delay:.4s;
+}
+
+.toolbox-intro p {
+    margin:0;
+    font-family:"Bodoni Moda",Georgia,serif;
+    font-size:clamp(17px,1.7vw,25px);
+    line-height:1.55;
+    color:rgba(255,255,255,.55);
+}
+
+.toolbox-grid {
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    border-top:1px solid rgba(255,255,255,.12);
+    border-left:1px solid rgba(255,255,255,.12);
+}
+
+.toolbox-item {
+    min-height:160px;
+    padding:25px 25px 22px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    border-right:1px solid rgba(255,255,255,.12);
+    border-bottom:1px solid rgba(255,255,255,.12);
+
+    opacity:0;
+    transform:translateY(40px);
+    filter:blur(7px);
+
+    transition:
+        opacity .8s ease,
+        transform .9s cubic-bezier(.16,1,.3,1),
+        filter .8s ease,
+        background .35s ease;
+}
+
+.toolbox-section.visible .toolbox-item {
+    opacity:1;
+    transform:translateY(0);
+    filter:blur(0);
+}
+
+.toolbox-section.visible .toolbox-item:nth-child(1) {transition-delay:.05s;}
+.toolbox-section.visible .toolbox-item:nth-child(2) {transition-delay:.12s;}
+.toolbox-section.visible .toolbox-item:nth-child(3) {transition-delay:.19s;}
+.toolbox-section.visible .toolbox-item:nth-child(4) {transition-delay:.26s;}
+.toolbox-section.visible .toolbox-item:nth-child(5) {transition-delay:.33s;}
+.toolbox-section.visible .toolbox-item:nth-child(6) {transition-delay:.40s;}
+.toolbox-section.visible .toolbox-item:nth-child(7) {transition-delay:.47s;}
+.toolbox-section.visible .toolbox-item:nth-child(8) {transition-delay:.54s;}
+
+.toolbox-item:hover {
+    background:rgba(255,255,255,.035);
+}
+
+.toolbox-item > span {
+    font-family:"Times New Roman",Georgia,serif;
+    font-size:14px;
+    color:rgba(255,255,255,.32);
+}
+
+.toolbox-item strong {
+    font-family:"Arial Black",Impact,sans-serif;
+    font-size:clamp(16px,1.5vw,23px);
+    letter-spacing:.02em;
+    color:rgba(255,255,255,.82);
+}
+
+.toolbox-item small {
+    font-size:7px;
+    letter-spacing:.22em;
+    color:rgba(255,255,255,.28);
+}
+
+
+/* =====================================================
+   ACHIEVEMENTS
+===================================================== */
+
+.achievements-section {
+    position:relative;
+    z-index:23;
+    width:100%;
+    min-height:100vh;
+    padding:130px 6vw 55px;
+    background:#080807;
+    color:#eeeeeb;
+    overflow:hidden;
+    box-shadow:0 -30px 80px rgba(0,0,0,.45);
+}
+
+.achievements-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-bottom:30px;
+    border-bottom:1px solid rgba(255,255,255,.12);
+}
+
+.achievements-index {
+    font-size:8px;
+    letter-spacing:.28em;
+    color:rgba(255,255,255,.3);
+}
+
+.achievements-main {
+    display:grid;
+    grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);
+    gap:8vw;
+    align-items:end;
+    padding:100px 0 110px;
+}
+
+.achievements-title {
+    display:flex;
+    flex-direction:column;
+    font-family:"Arial Black",Impact,sans-serif;
+    font-size:clamp(80px,13vw,210px);
+    line-height:.76;
+    letter-spacing:-.055em;
+    font-weight:900;
+}
+
+.achievements-title span {
+    display:block;
+    opacity:0;
+    transform:translateY(100px);
+    filter:blur(15px);
+    transition:
+        opacity 1.1s ease,
+        transform 1.2s cubic-bezier(.16,1,.3,1),
+        filter 1.1s ease;
+}
+
+.achievements-title em {
+    font-family:"Times New Roman",Georgia,serif;
+    font-weight:400;
+    font-style:italic;
+    letter-spacing:-.045em;
+    color:rgba(255,255,255,.55);
+}
+
+.achievements-section.visible .achievements-title span {
+    opacity:1;
+    transform:translateY(0);
+    filter:blur(0);
+}
+
+.achievements-section.visible .achievements-title span:nth-child(1) {
+    transition-delay:.05s;
+}
+
+.achievements-section.visible .achievements-title span:nth-child(2) {
+    transition-delay:.18s;
+}
+
+.achievements-intro {
+    max-width:430px;
+    padding-bottom:8px;
+    opacity:0;
+    transform:translateX(70px);
+    filter:blur(8px);
+    transition:
+        opacity 1s ease,
+        transform 1.1s cubic-bezier(.16,1,.3,1),
+        filter 1s ease;
+}
+
+.achievements-section.visible .achievements-intro {
+    opacity:1;
+    transform:translateX(0);
+    filter:blur(0);
+    transition-delay:.4s;
+}
+
+.achievements-intro p {
+    margin:0;
+    font-family:"Bodoni Moda",Georgia,serif;
+    font-size:clamp(17px,1.7vw,25px);
+    line-height:1.55;
+    color:rgba(255,255,255,.55);
+}
+
+.achievement-grid {
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    border-top:1px solid rgba(255,255,255,.12);
+    border-left:1px solid rgba(255,255,255,.12);
+}
+
+.achievement-item {
+    min-height:220px;
+    padding:25px 25px 25px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    border-right:1px solid rgba(255,255,255,.12);
+    border-bottom:1px solid rgba(255,255,255,.12);
+
+    opacity:0;
+    transform:translateY(45px);
+    filter:blur(8px);
+
+    transition:
+        opacity .9s ease,
+        transform 1s cubic-bezier(.16,1,.3,1),
+        filter .9s ease;
+}
+
+.achievements-section.visible .achievement-item {
+    opacity:1;
+    transform:translateY(0);
+    filter:blur(0);
+}
+
+.achievements-section.visible .achievement-item:nth-child(1) {
+    transition-delay:.1s;
+}
+
+.achievements-section.visible .achievement-item:nth-child(2) {
+    transition-delay:.22s;
+}
+
+.achievements-section.visible .achievement-item:nth-child(3) {
+    transition-delay:.34s;
+}
+
+.achievements-section.visible .achievement-item:nth-child(4) {
+    transition-delay:.46s;
+}
+
+.achievement-number {
+    font-family:"Arial Black",Impact,sans-serif;
+    font-size:clamp(55px,6vw,100px);
+    line-height:.85;
+    letter-spacing:-.045em;
+}
+
+.achievement-item strong {
+    font-family:"Arial Black",Impact,sans-serif;
+    font-size:14px;
+    letter-spacing:.03em;
+    color:rgba(255,255,255,.8);
+}
+
+.achievement-item small {
+    font-size:7px;
+    letter-spacing:.22em;
+    color:rgba(255,255,255,.28);
+}
+
+.achievements-footer {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-top:28px;
+    font-size:8px;
+    letter-spacing:.3em;
+    color:rgba(255,255,255,.28);
+}
+/* =====================================================
    MOBILE
 ===================================================== */
 
