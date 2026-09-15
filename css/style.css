@@ -2186,6 +2186,79 @@ body.intro-active {
 ===================================================== */
 
 @media (max-width: 700px) {
+       /* =====================================================
+       CONTACT — MOBILE
+    ===================================================== */
+
+    .contact-section {
+        min-height:auto;
+        padding:90px 22px 45px;
+    }
+
+    .contact-header {
+        padding-bottom:22px;
+    }
+
+    .contact-index {
+        font-size:7px;
+        letter-spacing:.2em;
+    }
+
+    .contact-main {
+        display:flex;
+        flex-direction:column;
+        align-items:flex-start;
+        gap:55px;
+        padding:70px 0 80px;
+    }
+
+    .contact-title {
+        width:100%;
+        font-size:clamp(52px,16vw,90px);
+        line-height:.8;
+        letter-spacing:-.045em;
+    }
+
+    .contact-description {
+        width:100%;
+        max-width:100%;
+        padding-bottom:0;
+    }
+
+    .contact-description p {
+        font-size:clamp(16px,5vw,21px);
+        line-height:1.5;
+    }
+
+    .contact-email {
+        max-width:100%;
+        margin-top:28px;
+        font-size:7px;
+        letter-spacing:.14em;
+        overflow-wrap:anywhere;
+    }
+
+    .contact-links {
+        grid-template-columns:1fr;
+    }
+
+    .contact-links a {
+        min-height:70px;
+        padding:20px 0;
+        border-right:none;
+        border-bottom:1px solid rgba(255,255,255,.12);
+        font-size:8px;
+    }
+
+    .contact-links a:last-child {
+        border-bottom:none;
+    }
+
+    .contact-footer {
+        padding-top:25px;
+        font-size:7px;
+        letter-spacing:.22em;
+    }
 
 
     .hero {
