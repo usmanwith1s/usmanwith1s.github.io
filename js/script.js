@@ -423,3 +423,81 @@ if (contactSection) {
 
     contactObserver.observe(contactSection);
 }
+/* =====================================================
+   TOOLBOX REVEAL
+===================================================== */
+
+const toolboxSection =
+    document.querySelector(".toolbox-section");
+
+if (toolboxSection) {
+
+    const toolboxObserver =
+        new IntersectionObserver(
+            (entries) => {
+
+                entries.forEach((entry) => {
+
+                    if (entry.isIntersecting) {
+
+                        toolboxSection.classList.add(
+                            "visible"
+                        );
+
+                        toolboxObserver.unobserve(
+                            toolboxSection
+                        );
+
+                    }
+
+                });
+
+            },
+            {
+                threshold:0.3
+            }
+        );
+
+    toolboxObserver.observe(toolboxSection);
+}
+
+
+/* =====================================================
+   ACHIEVEMENTS REVEAL
+===================================================== */
+
+const achievementsSection =
+    document.querySelector(".achievements-section");
+
+if (achievementsSection) {
+
+    const achievementsObserver =
+        new IntersectionObserver(
+            (entries) => {
+
+                entries.forEach((entry) => {
+
+                    if (entry.isIntersecting) {
+
+                        achievementsSection.classList.add(
+                            "visible"
+                        );
+
+                        achievementsObserver.unobserve(
+                            achievementsSection
+                        );
+
+                    }
+
+                });
+
+            },
+            {
+                threshold:0.3
+            }
+        );
+
+    achievementsObserver.observe(
+        achievementsSection
+    );
+}
