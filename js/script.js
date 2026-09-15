@@ -98,6 +98,10 @@ let targetY = 0;
 let hovering = false;
 
 
+/* =====================================================
+   DESKTOP MOUSE
+===================================================== */
+
 hero.addEventListener(
     "mousemove",
     (event) => {
@@ -105,16 +109,13 @@ hero.addEventListener(
         const rect =
             hero.getBoundingClientRect();
 
-
         targetX =
             event.clientX -
             rect.left;
 
-
         targetY =
             event.clientY -
             rect.top;
-
 
         hovering = true;
 
@@ -122,12 +123,68 @@ hero.addEventListener(
 );
 
 
+/* =====================================================
+   PHONE / TABLET TOUCH
+===================================================== */
+
+hero.addEventListener(
+    "touchstart",
+    (event) => {
+
+        const touch =
+            event.touches[0];
+
+        const rect =
+            hero.getBoundingClientRect();
+
+        targetX =
+            touch.clientX -
+            rect.left;
+
+        targetY =
+            touch.clientY -
+            rect.top;
+
+        hovering = true;
+
+    },
+    {
+        passive: true
+    }
+);
+
+
+hero.addEventListener(
+    "touchmove",
+    (event) => {
+
+        const touch =
+            event.touches[0];
+
+        const rect =
+            hero.getBoundingClientRect();
+
+        targetX =
+            touch.clientX -
+            rect.left;
+
+        targetY =
+            touch.clientY -
+            rect.top;
+
+        hovering = true;
+
+    },
+    {
+        passive: true
+    }
+);
+
 
 function animate() {
 
     mouseX +=
         (targetX - mouseX) * 0.15;
-
 
     mouseY +=
         (targetY - mouseY) * 0.15;
@@ -147,7 +204,6 @@ function animate() {
         hiddenLayer.style.clipPath =
             circle;
 
-
         superheroLayer.style.clipPath =
             circle;
 
@@ -163,6 +219,9 @@ function animate() {
 animate();
 
 
+/* =====================================================
+   DESKTOP LEAVE
+===================================================== */
 
 hero.addEventListener(
     "mouseleave",
@@ -170,18 +229,14 @@ hero.addEventListener(
 
         hovering = false;
 
-
         hiddenLayer.style.clipPath =
             "circle(0px at 50% 50%)";
-
 
         superheroLayer.style.clipPath =
             "circle(0px at 50% 50%)";
 
     }
 );
-
-
 
 /* =====================================================
    PROJECT IMAGE REVEAL
